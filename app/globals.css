@@ -1,0 +1,17 @@
+/* TailwindCSS v4の新しいインポート方式 */
+@import "tailwindcss";
+
+/* カスタムテーマ設定 */
+@theme {
+  --color-primary: #059669;      /* メインカラー(緑) */
+  --color-secondary: #D1FAE5;    /* セカンダリカラー(薄緑) */
+  --color-accent: #3B82F6;       /* アクセントカラー(青) */
+}
+
+/* 基本レイヤーにカスタムスタイルを追加 */
+@layer base {
+  body {
+    /* 全体の背景色とテキスト色を設定 */
+    @apply bg-gray-50 text-gray-900;
+  }
+}
