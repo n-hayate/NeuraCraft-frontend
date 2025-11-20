@@ -58,8 +58,17 @@ npm run dev
 
 4. **ブラウザで確認**
 ```
-http://localhost:3000
+http://localhost:3000/login
 ```
+
+## 🔐 デモログイン情報
+
+開発環境でのログインには以下の認証情報を使用してください:
+
+- **メールアドレス**: `admin@example.com`
+- **パスワード**: `password`
+
+> **注意**: これはデモ用の認証情報です。本番環境では実際のAPIと連携します。
 
 ## 📝 利用可能なコマンド
 
@@ -90,7 +99,8 @@ npm run lint
 ```
 NeuraCraft-frontend/
 ├── app/                    # Next.js App Router
-│   ├── login/             # ログイン画面
+│   ├── login/             # ログイン画面 ✅
+│   │   └── page.tsx       # ログインページ
 │   ├── search/            # 検索画面（メイン）
 │   ├── register/          # ファイル登録画面
 │   ├── admin/             # 管理画面
@@ -98,25 +108,41 @@ NeuraCraft-frontend/
 │   ├── page.tsx           # トップページ
 │   └── globals.css        # グローバルスタイル
 ├── components/             # 再利用可能なコンポーネント
-│   ├── ui/                # 基本UIコンポーネント
-│   └── layout/            # レイアウトコンポーネント
+│   └── ui/                # 基本UIコンポーネント ✅
+│       ├── Input.tsx      # 入力フィールドコンポーネント
+│       └── Button.tsx     # ボタンコンポーネント
 ├── hooks/                  # カスタムフック
-├── store/                  # Zustand状態管理
+├── store/                  # Zustand状態管理 ✅
+│   └── authStore.ts       # 認証状態管理
 ├── api/                    # API通信ロジック
-├── types/                  # TypeScript型定義
+├── types/                  # TypeScript型定義 ✅
+│   └── auth.ts            # 認証関連の型定義
 ├── utils/                  # ユーティリティ関数
-└── doc/                    # ドキュメント
+├── doc/                    # ドキュメント
+│   ├── テキスト/          # ハンズオンテキスト
+│   └── 報告書/            # 実装報告書 ✅
+│       └── ログイン機能実装実施報告書.md
+└── ref/                    # デザインリファレンス
+    └── stitch_/           # UIデザイン画像・HTML
 ```
+
+> ✅ マークは実装済みの項目を示します
 
 ## 🎨 TailwindCSS v4について
 
 このプロジェクトではTailwindCSS v4を使用しています。
 
+### 設定ファイル
+
+- `tailwind.config.ts` - カラーテーマやコンテンツパスの設定
+- `postcss.config.mjs` - PostCSS設定（`@tailwindcss/postcss`プラグイン使用）
+- `app/globals.css` - `@import "tailwindcss"`でスタイルを読み込み
+
 ### カスタムカラー
 
-`app/globals.css`で以下のカスタムカラーを定義:
+`tailwind.config.ts`で以下のカスタムカラーを定義:
 
-- `primary` (#059669) - メインカラー（緑）
+- `primary` (#007A5A) - メインカラー（緑）
 - `secondary` (#D1FAE5) - セカンダリカラー（薄緑）
 - `accent` (#3B82F6) - アクセントカラー（青）
 
@@ -124,6 +150,12 @@ NeuraCraft-frontend/
 ```tsx
 <button className="bg-primary text-white">ボタン</button>
 ```
+
+### TailwindCSS v4の特徴
+
+- `@import "tailwindcss"` による新しいインポート方式
+- `@tailwindcss/postcss` プラグインが必須
+- 従来の `@tailwind base/components/utilities` から移行
 
 ## 🔧 トラブルシューティング
 
@@ -145,12 +177,35 @@ npm install
 1. 開発サーバーを再起動
 2. ブラウザのキャッシュをクリア（Ctrl + Shift + R）
 
+## 🎯 実装進捗
+
+### Chapter 2: ログイン画面 ✅ 完了
+
+- [x] 型定義の作成 (`types/auth.ts`)
+- [x] 基本UIコンポーネント (`Input.tsx`, `Button.tsx`)
+- [x] 認証ストア (`store/authStore.ts`)
+- [x] ログインページ (`app/login/page.tsx`)
+- [x] TailwindCSS v4設定 (`tailwind.config.ts`, `postcss.config.mjs`)
+- [x] バリデーション機能
+- [x] パスワード表示/非表示切替
+- [x] ローディング状態表示
+- [x] エラーハンドリング
+
+詳細は [ログイン機能実装実施報告書](doc/報告書/ログイン機能実装実施報告書.md) を参照してください。
+
+### Chapter 3: 検索画面（メイン） 🚧 準備中
+
+### Chapter 4: ファイル登録画面 📝 未実装
+
+### Chapter 5: 管理画面 📝 未実装
+
 ## 📚 参考リンク
 
 - [Next.js公式ドキュメント](https://nextjs.org/docs)
 - [TailwindCSS v4ドキュメント](https://tailwindcss.com/docs)
 - [React公式ドキュメント](https://react.dev/)
 - [TypeScript公式ドキュメント](https://www.typescriptlang.org/docs/)
+- [Zustand公式ドキュメント](https://zustand-demo.pmnd.rs/)
 
 ## 📄 ライセンス
 
