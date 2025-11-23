@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { AuthState } from '@/types/auth';
+import { authApi } from '@/api/auth';
 
 // Zustandでグローバルな認証ストアを作成
 // このストアはアプリ全体からアクセス可能
@@ -10,34 +11,41 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   // ログイン関数
   login: async (email: string, password: string) => {
-    // TODO: 実際のAPI呼び出しに置き換える
-    // 仮のログイン処理（開発用）
-    // 1秒待機してAPIコールをシミュレート
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // 実際のAPI呼び出し
+      const tokenResponse = await authApi.login({ email, password });
 
-    // デモ用の認証チェック
-    if (email === 'admin@example.com' && password === 'password') {
+      // トークンをローカルストレージに保存
+      localStorage.setItem('authToken', tokenResponse.access_token);
+
+      // ユーザー情報を取得
+      const userResponse = await authApi.me();
+
       // ログイン成功: ユーザー情報をストアに保存
       set({
         user: {
-          id: '1',
-          email: 'admin@example.com',
-          name: '管理者',
-          role: 'admin',
+          id: userResponse.id,
+          email: userResponse.email,
+          name: userResponse.full_name || userResponse.email,
+          role: 'user', // バックエンドにroleがない場合はデフォルト値
         },
         isAuthenticated: true,
       });
 
       // クッキーに認証状態を保存（ミドルウェアで使用）
       document.cookie = 'isAuthenticated=true; path=/; max-age=86400'; // 24時間有効
-    } else {
+    } catch (error) {
       // ログイン失敗: エラーをスロー
-      throw new Error('Invalid credentials');
+      console.error('Login failed:', error);
+      throw new Error('ログインに失敗しました。メールアドレスとパスワードを確認してください。');
     }
   },
 
   // ログアウト関数
   logout: () => {
+    // トークンを削除
+    localStorage.removeItem('authToken');
+
     // ユーザー情報をクリアして未認証状態に戻す
     set({ user: null, isAuthenticated: false });
 

@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Upload, CheckCircle } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
 
 // フォームデータの型定義
 interface FileUploadForm {
@@ -46,6 +45,9 @@ export default function FileRegisterPage() {
     setFormData({ ...formData, [field]: value });
   };
 
+  // ファイル選択状態（選択済みかどうか）
+  const [fileSelected, setFileSelected] = useState(false);
+
   // ファイル選択時の処理
   const handleFileSelect = (file: File) => {
     // 許可するファイル形式のリスト
@@ -64,11 +66,11 @@ export default function FileRegisterPage() {
     // ファイルをフォームデータに追加
     setFormData({ ...formData, file });
 
-    // サーバー側で生成されるファイル名のシミュレーション
-    setUploadedFileName(`KD-202405-00123.${file.name.split('.').pop()}`);
+    // ファイル選択完了フラグを立てる
+    setFileSelected(true);
 
-    // 成功メッセージを表示
-    setUploadSuccess(true);
+    // 登録成功フラグはリセット（新しいファイル選択時）
+    setUploadSuccess(false);
   };
 
   // ファイルドロップ時の処理
@@ -118,24 +120,50 @@ export default function FileRegisterPage() {
 
     setIsLoading(true);
 
-    // TODO: 実際のアップロード処理に置き換える
-    // 2秒待機してアップロードをシミュレート
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // FormDataを作成してファイルとメタデータを設定
+      const uploadData = new FormData();
 
-    alert('ナレッジの登録が完了しました');
-    setIsLoading(false);
+      // ファイルは 'uploaded_file' という名前で送信（バックエンドの要求に合わせる）
+      uploadData.append('uploaded_file', formData.file);
 
-    // フォームリセット
-    setFormData({
-      finalProduct: '',
-      challenge: '',
-      ingredients: '',
-      company: '',
-      trialId: '',
-      assignee: '',
-      file: null,
-    });
-    setUploadSuccess(false);
+      // メタデータフィールドを追加
+      uploadData.append('final_product', formData.finalProduct);
+      uploadData.append('issue', formData.challenge);
+      uploadData.append('ingredient', formData.ingredients);
+      uploadData.append('customer', formData.company);
+      uploadData.append('trial_id', formData.trialId);
+
+      // 開発担当者が入力されている場合のみ追加
+      if (formData.assignee) {
+        uploadData.append('author', formData.assignee);
+      }
+
+      // filesApi.create()を使ってアップロード
+      const { filesApi } = await import('@/api/files');
+      const response = await filesApi.create(uploadData);
+
+      // 成功時の処理
+      setUploadedFileName(response.filename || 'ファイル名取得失敗');
+      setUploadSuccess(true);
+
+      // フォームリセット
+      setFormData({
+        finalProduct: '',
+        challenge: '',
+        ingredients: '',
+        company: '',
+        trialId: '',
+        assignee: '',
+        file: null,
+      });
+      setFileSelected(false);
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('アップロードに失敗しました。もう一度お試しください。');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -244,16 +272,35 @@ export default function FileRegisterPage() {
               </p>
             </div>
 
+            {/* ファイル選択完了メッセージ */}
+            {fileSelected && !uploadSuccess && formData.file && (
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-blue-600" />
+                <div>
+                  <p className="text-blue-800 font-medium">
+                    ファイルが選択されました
+                  </p>
+                  <p className="text-blue-700 text-sm">
+                    ファイル名: {formData.file.name}
+                  </p>
+                  <p className="text-blue-700 text-sm mt-1">
+                    メタ情報を入力して「登録する」ボタンを押してください。
+                  </p>
+                </div>
+              </div>
+            )}
+            
+
             {/* アップロード成功メッセージ */}
             {uploadSuccess && (
               <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
                 <CheckCircle className="w-5 h-5 text-green-600" />
                 <div>
                   <p className="text-green-800 font-medium">
-                    ナレッジの登録が完了しました。
+                    ナレッジの登録が完了しました！
                   </p>
                   <p className="text-green-700 text-sm">
-                    生成ファイル名: {uploadedFileName}
+                    登録ファイル名: {uploadedFileName}
                   </p>
                 </div>
               </div>
@@ -261,14 +308,14 @@ export default function FileRegisterPage() {
           </div>
 
           {/* 登録ボタン */}
-          <div className="flex justify-end">
-            <Button
+          <div className="mt-8 flex justify-center">
+            <button
               type="submit"
-              isLoading={isLoading}
-              className="px-12"
+              disabled={isLoading}
+              className="px-16 py-4 text-lg font-bold shadow-lg hover:shadow-xl bg-gray-200 text-black hover:bg-gray-300 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              登録する
-            </Button>
+              {isLoading ? '登録中...' : '登録する'}
+            </button>
           </div>
         </form>
       </main>

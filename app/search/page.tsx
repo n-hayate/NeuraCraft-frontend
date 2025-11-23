@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { SearchBar } from '@/components/SearchBar';
 import { FilterBar } from '@/components/FilterBar';
 import { DocumentCard } from '@/components/DocumentCard';
 import { KnowledgeDocument, SearchFilters } from '@/types/knowledge';
+import { filesApi } from '@/api/files';
+import { FileRead } from '@/types/files';
 
 // モックデータ（開発用のダミーデータ）
 const mockDocuments: KnowledgeDocument[] = [
@@ -60,10 +62,76 @@ export default function SearchPage() {
   // 検索結果のドキュメントリストを管理
   const [documents, setDocuments] = useState(mockDocuments);
 
+  // ローディング状態
+  const [isLoading, setIsLoading] = useState(false);
+
+  // エラー状態
+  const [error, setError] = useState<string | null>(null);
+
+  // バックエンドのFileReadをKnowledgeDocumentに変換
+  const convertFileToDocument = (file: FileRead): KnowledgeDocument => ({
+    id: file.id,
+    title: file.original_filename,
+    type: file.content_type.includes('pdf') ? 'pdf' :
+          file.content_type.includes('word') ? 'word' :
+          file.content_type.includes('presentation') ? 'powerpoint' : 'pdf',
+    finalProduct: file.final_product || '',
+    challenge: file.issue || '',
+    ingredients: file.ingredient || '',
+    company: file.customer || '',
+    assignee: file.author || '',
+    updatedAt: new Date(file.updated_at).toISOString().split('T')[0],
+    thumbnailUrl: 'https://via.placeholder.com/192x128',
+    fileUrl: file.azure_blob_url,
+  });
+
+  // ページ読み込み時にファイル一覧を取得
+  useEffect(() => {
+    const fetchFiles = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const files = await filesApi.getAll({ limit: 100, offset: 0 });
+        const docs = files.map(convertFileToDocument);
+        setDocuments(docs);
+      } catch (err) {
+        console.error('Failed to fetch files:', err);
+        setError('ファイルの取得に失敗しました');
+        // エラー時はモックデータを表示
+        setDocuments(mockDocuments);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFiles();
+  }, []);
+
   // 検索実行時の処理
-  const handleSearch = () => {
-    // TODO: 実際の検索API呼び出しに置き換える
-    console.log('Searching for:', searchQuery, filters);
+  const handleSearch = async () => {
+    if (!searchQuery && Object.keys(filters).length === 0) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const files = await filesApi.search({
+        final_product: filters.finalProduct,
+        issue: filters.challenge,
+        ingredient: filters.ingredients,
+        customer: filters.company,
+        limit: 100,
+        offset: 0,
+      });
+      const docs = files.map(convertFileToDocument);
+      setDocuments(docs);
+    } catch (err) {
+      console.error('Search failed:', err);
+      setError('検索に失敗しました');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -87,26 +155,42 @@ export default function SearchPage() {
           <FilterBar filters={filters} onChange={setFilters} />
         </div>
 
-        {/* 検索結果エリア */}
-        <div className="mb-6">
-          {/* ヘッダー: 件数と並び替え */}
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900">
-              {documents.length}件の結果
-            </h2>
-            <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-              <option>並び替え: 更新日順</option>
-              <option>並び替え: 関連度順</option>
-            </select>
+        {/* ローディング表示 */}
+        {isLoading && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">読み込み中...</p>
           </div>
+        )}
 
-          {/* ドキュメントカードのリスト */}
-          <div className="space-y-4">
-            {documents.map((doc) => (
-              <DocumentCard key={doc.id} document={doc} />
-            ))}
+        {/* エラー表示 */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-800">{error}</p>
           </div>
-        </div>
+        )}
+
+        {/* 検索結果エリア */}
+        {!isLoading && !error && (
+          <div className="mb-6">
+            {/* ヘッダー: 件数と並び替え */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-900">
+                {documents.length}件の結果
+              </h2>
+              <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                <option>並び替え: 更新日順</option>
+                <option>並び替え: 関連度順</option>
+              </select>
+            </div>
+
+            {/* ドキュメントカードのリスト */}
+            <div className="space-y-4">
+              {documents.map((doc) => (
+                <DocumentCard key={doc.id} document={doc} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ページネーション */}
         <div className="flex items-center justify-center gap-2">

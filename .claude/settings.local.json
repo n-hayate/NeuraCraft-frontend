@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -X POST \"https://neuracraft-backend-bwagewerdrbqczch.japaneast-01.azurewebsites.net/api/v1/files/\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzYzODY1NDYwfQ.H96c6a9vCLxSQAUntTuHbPc9UP1FbLW6jNGYTS1_DgE\" -F \"file=@test-document.txt\" -F \"final_product=Sample Product\" -F \"issue=Quality Testing\" -F \"ingredient=Test Ingredient\" -F \"customer=Test Customer\" -F \"trial_id=TRIAL-001\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
