@@ -27,6 +27,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         },
         isAuthenticated: true,
       });
+
+      // クッキーに認証状態を保存（ミドルウェアで使用）
+      document.cookie = 'isAuthenticated=true; path=/; max-age=86400'; // 24時間有効
     } else {
       // ログイン失敗: エラーをスロー
       throw new Error('Invalid credentials');
@@ -37,5 +40,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     // ユーザー情報をクリアして未認証状態に戻す
     set({ user: null, isAuthenticated: false });
+
+    // クッキーから認証状態を削除
+    document.cookie = 'isAuthenticated=; path=/; max-age=0';
   },
 }));
