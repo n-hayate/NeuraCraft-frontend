@@ -144,7 +144,7 @@ export default function FileRegisterPage() {
       const response = await filesApi.create(uploadData);
 
       // 成功時の処理
-      setUploadedFileName(response.filename || 'ファイル名取得失敗');
+      setUploadedFileName((response as any).filename || 'ファイル名取得失敗');
       setUploadSuccess(true);
 
       // フォームリセット
