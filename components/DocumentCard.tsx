@@ -1,5 +1,8 @@
+'use client';
+
 import { Download } from 'lucide-react';
 import { KnowledgeDocument } from '@/types/knowledge';
+import { useFileDownload } from '@/hooks/useFileDownload';
 
 // 親コンポーネントから受け取るPropsの型定義
 interface DocumentCardProps {
@@ -24,6 +27,16 @@ const tagColors = {
 };
 
 export const DocumentCard = ({ document }: DocumentCardProps) => {
+  // カスタムフックを使用してダウンロード機能を取得
+  const { downloadFile, isDownloading, error } = useFileDownload();
+
+  /**
+   * ダウンロードボタンクリック時の処理
+   */
+  const handleDownload = async () => {
+    await downloadFile(document.id, document.title);
+  };
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
       <div className="flex gap-4">
@@ -73,10 +86,23 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
             </span>
           </div>
 
+          {/* エラーメッセージ表示 */}
+          {error && (
+            <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
           {/* ダウンロードボタン */}
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
             <Download className="w-4 h-4" />
-            <span className="text-sm font-medium">ダウンロード</span>
+            <span className="text-sm font-medium">
+              {isDownloading ? 'ダウンロード中...' : 'ダウンロード'}
+            </span>
           </button>
         </div>
 
