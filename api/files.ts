@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import { FileRead, DashboardResponse, FileSearchParams, DownloadUrlResponse } from '@/types/files';
+import { FileRead, DashboardResponse, FileSearchParams, FileSearchResponse, DownloadUrlResponse } from '@/types/files';
 
 // ファイルAPIの関数をまとめたオブジェクト
 export const filesApi = {
@@ -11,7 +11,7 @@ export const filesApi = {
 
   // 検索機能（フィルター対応）
   search: async (params: FileSearchParams) => {
-    const response = await apiClient.get<FileRead[]>('/files/search', { params });
+    const response = await apiClient.get<FileSearchResponse>('/files/search', { params });
     return response.data;
   },
 

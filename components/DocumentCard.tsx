@@ -20,10 +20,10 @@ const documentIcons = {
 // タグの色分け定義
 const tagColors = {
   finalProduct: 'bg-green-100 text-green-800',
-  challenge: 'bg-orange-100 text-orange-800',
-  ingredients: 'bg-blue-100 text-blue-800',
-  company: 'bg-purple-100 text-purple-800',
-  assignee: 'bg-gray-100 text-gray-800',
+  issue: 'bg-orange-100 text-orange-800',
+  ingredient: 'bg-blue-100 text-blue-800',
+  customer: 'bg-purple-100 text-purple-800',
+  author: 'bg-gray-100 text-gray-800',
 };
 
 export const DocumentCard = ({ document }: DocumentCardProps) => {
@@ -69,21 +69,27 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
               最終製品: {document.finalProduct}
             </span>
             {/* 課題感タグ */}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.challenge}`}>
-              課題感: {document.challenge}
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.issue}`}>
+              課題感: {document.issue}
             </span>
             {/* 使用原料タグ */}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.ingredients}`}>
-              使用原料: {document.ingredients}
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.ingredient}`}>
+              使用原料: {document.ingredient}
             </span>
-            {/* 顧客タグ */}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.company}`}>
-              顧客: {document.company}
+            {/* 提案企業タグ */}
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.customer}`}>
+              提案企業: {document.customer}
+            </span>
+            {/* 試作IDタグ */}
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+              試作ID: {document.trialId}
             </span>
             {/* 担当者タグ */}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.assignee}`}>
-              担当者: {document.assignee}
-            </span>
+            {document.author && (
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.author}`}>
+                担当者: {document.author}
+              </span>
+            )}
           </div>
 
           {/* エラーメッセージ表示 */}

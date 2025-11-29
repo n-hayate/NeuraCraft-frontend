@@ -21,19 +21,24 @@ export interface FileRead {
   download_count?: number; // ダウンロード回数
 }
 
-// ファイル検索のフィルター条件
+// ファイル検索のフィルター条件（バックエンドAPI仕様に準拠）
 export interface FileSearchParams {
+  q?: string;              // 検索キーワード（ファイル名での部分一致検索）
   final_product?: string;
   issue?: string;
   ingredient?: string;
   customer?: string;
   trial_id?: string;
   author?: string;
-  status?: string;
-  limit?: number;
-  offset?: number;
-  sort_by?: string;
-  order?: "asc" | "desc";
+  sort_by?: string;        // デフォルト: "updated_at_desc"
+  page?: number;           // ページ番号（1始まり、デフォルト: 1）
+  page_size?: number;      // 1ページあたりの件数（デフォルト: 10, 最大: 100）
+}
+
+// ファイル検索のレスポンス（バックエンドAPI仕様に準拠）
+export interface FileSearchResponse {
+  total_count: number;
+  files: FileRead[];
 }
 
 // ダッシュボード用：ランキングアイテム

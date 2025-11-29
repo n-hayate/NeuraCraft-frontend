@@ -8,47 +8,51 @@ import { DocumentCard } from '@/components/DocumentCard';
 import { KnowledgeDocument, SearchFilters } from '@/types/knowledge';
 import { filesApi } from '@/api/files';
 import { FileRead } from '@/types/files';
+import { useDebounce } from '@/hooks/useDebounce';
 
 // モックデータ（開発用のダミーデータ）
 const mockDocuments: KnowledgeDocument[] = [
   {
     id: '1',
-    title: '中華まん生地の改良に関するレポート.pdf',
+    title: '中華まん_ふわふわ食感_強力粉_ABCフーズ_AB01.pdf',
     type: 'pdf',
     finalProduct: '中華まん',
-    challenge: 'ふわふわ食感',
-    ingredients: '強力粉',
-    company: 'ABCフーズ',
-    assignee: '鈴木一郎',
+    issue: 'ふわふわ食感',
+    ingredient: '強力粉',
+    customer: 'ABCフーズ',
+    trialId: 'AB01',
+    author: '鈴木一郎',
     updatedAt: '2023-10-27',
     thumbnailUrl: 'https://via.placeholder.com/192x128',
     fileUrl: '/files/report1.pdf',
   },
   {
     id: '2',
-    title: '冷凍うどんの食感改善トライアル.docx',
-    type: 'word',
+    title: '冷凍うどん_コシの持続_タピオカ粉_フードテック社_FT02.xlsx',
+    type: 'excel',
     finalProduct: '冷凍うどん',
-    challenge: 'コシの持続',
-    ingredients: 'タピオカ粉',
-    company: 'フードテック社',
-    assignee: '佐藤花子',
+    issue: 'コシの持続',
+    ingredient: 'タピオカ粉',
+    customer: 'フードテック社',
+    trialId: 'FT02',
+    author: '佐藤花子',
     updatedAt: '2023-09-15',
     thumbnailUrl: 'https://via.placeholder.com/192x128',
-    fileUrl: '/files/trial2.docx',
+    fileUrl: '/files/trial2.xlsx',
   },
   {
     id: '3',
-    title: '新食感グミの開発提案.pptx',
-    type: 'powerpoint',
+    title: 'グミ_口溶けの良さ_ゼラチン_OYATSUカンパニー_OY03.pdf',
+    type: 'pdf',
     finalProduct: 'グミ',
-    challenge: '口溶けの良さ',
-    ingredients: 'ゼラチン',
-    company: 'OYATSUカンパニー',
-    assignee: '高橋健太',
+    issue: '口溶けの良さ',
+    ingredient: 'ゼラチン',
+    customer: 'OYATSUカンパニー',
+    trialId: 'OY03',
+    author: '高橋健太',
     updatedAt: '2023-08-01',
     thumbnailUrl: 'https://via.placeholder.com/192x128',
-    fileUrl: '/files/proposal3.pptx',
+    fileUrl: '/files/proposal3.pdf',
   },
 ];
 
@@ -60,7 +64,7 @@ export default function SearchPage() {
   const [filters, setFilters] = useState<SearchFilters>({});
 
   // 検索結果のドキュメントリストを管理
-  const [documents, setDocuments] = useState(mockDocuments);
+  const [documents, setDocuments] = useState<KnowledgeDocument[]>(mockDocuments);
 
   // ローディング状態
   const [isLoading, setIsLoading] = useState(false);
@@ -68,71 +72,119 @@ export default function SearchPage() {
   // エラー状態
   const [error, setError] = useState<string | null>(null);
 
+  // ページネーション
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const itemsPerPage = 10;
+
+  // デバウンス処理: フィルターの変更を300ms遅延
+  const debouncedFilters = useDebounce(filters, 300);
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
   // バックエンドのFileReadをKnowledgeDocumentに変換
-  const convertFileToDocument = (file: FileRead): KnowledgeDocument => ({
-    id: file.id,
-    title: file.original_filename,
-    type: file.content_type.includes('pdf') ? 'pdf' :
-          file.content_type.includes('word') ? 'word' :
-          file.content_type.includes('presentation') ? 'powerpoint' : 'pdf',
-    finalProduct: file.final_product || '',
-    challenge: file.issue || '',
-    ingredients: file.ingredient || '',
-    company: file.customer || '',
-    assignee: file.author || '',
-    updatedAt: new Date(file.updated_at).toISOString().split('T')[0],
-    thumbnailUrl: 'https://via.placeholder.com/192x128',
-    fileUrl: file.azure_blob_url,
-  });
+  const convertFileToDocument = (file: FileRead): KnowledgeDocument => {
+    // content_typeからファイルタイプを判定（undefinedの場合は空文字列）
+    const contentType = file.content_type || '';
+    let docType: KnowledgeDocument['type'] = 'pdf';
 
-  // ページ読み込み時にファイル一覧を取得
-  useEffect(() => {
-    const fetchFiles = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const files = await filesApi.getAll({ limit: 100, offset: 0 });
-        const docs = files.map(convertFileToDocument);
-        setDocuments(docs);
-      } catch (err) {
-        console.error('Failed to fetch files:', err);
-        setError('ファイルの取得に失敗しました');
-        // エラー時はモックデータを表示
-        setDocuments(mockDocuments);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchFiles();
-  }, []);
-
-  // 検索実行時の処理
-  const handleSearch = async () => {
-    if (!searchQuery && Object.keys(filters).length === 0) {
-      return;
+    if (contentType.includes('pdf')) {
+      docType = 'pdf';
+    } else if (contentType.includes('word') || contentType.includes('document')) {
+      docType = 'word';
+    } else if (contentType.includes('sheet') || contentType.includes('excel')) {
+      docType = 'excel';
+    } else if (contentType.includes('presentation') || contentType.includes('powerpoint')) {
+      docType = 'powerpoint';
     }
 
+    return {
+      id: file.id,
+      title: file.original_filename,
+      type: docType,
+      finalProduct: file.final_product || '',
+      issue: file.issue || '',
+      ingredient: file.ingredient || '',
+      customer: file.customer || '',
+      trialId: file.trial_id || '',
+      author: file.author || '',
+      updatedAt: new Date(file.updated_at).toISOString().split('T')[0],
+      thumbnailUrl: 'https://via.placeholder.com/192x128',
+      fileUrl: file.azure_blob_url,
+    };
+  };
+
+  /**
+   * 検索を実行する関数
+   */
+  const performSearch = async () => {
     setIsLoading(true);
     setError(null);
+
     try {
-      const files = await filesApi.search({
-        final_product: filters.finalProduct,
-        issue: filters.challenge,
-        ingredient: filters.ingredients,
-        customer: filters.company,
-        limit: 100,
-        offset: 0,
-      });
-      const docs = files.map(convertFileToDocument);
-      setDocuments(docs);
+      // フィルターまたは検索キーワードが存在するかチェック
+      const hasFilters = Object.values(debouncedFilters).some(v => v);
+
+      let result;
+
+      if (hasFilters || debouncedSearchQuery) {
+        // フィルター検索またはキーワード検索
+        result = await filesApi.search({
+          q: debouncedSearchQuery || undefined,
+          final_product: debouncedFilters.finalProduct,
+          issue: debouncedFilters.issue,
+          ingredient: debouncedFilters.ingredient,
+          customer: debouncedFilters.customer,
+          trial_id: debouncedFilters.trialId,
+          author: debouncedFilters.author,
+          page: currentPage,
+          page_size: itemsPerPage,
+        });
+
+        const docs = result.files.map(convertFileToDocument);
+        setDocuments(docs);
+        setTotalCount(result.total_count);
+      } else {
+        // 全件取得
+        const files = await filesApi.getAll({
+          limit: itemsPerPage,
+          offset: (currentPage - 1) * itemsPerPage,
+        });
+
+        const docs = files.map(convertFileToDocument);
+        setDocuments(docs);
+        // 全件取得の場合は総件数が分からないため、取得件数をセット
+        setTotalCount(files.length);
+      }
+
     } catch (err) {
       console.error('Search failed:', err);
       setError('検索に失敗しました');
+      // エラー時はモックデータを表示
+      setDocuments(mockDocuments);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // デバウンスされたフィルターまたはページが変更されたら自動で検索
+  useEffect(() => {
+    performSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedFilters, debouncedSearchQuery, currentPage]);
+
+  // 検索ボタンクリック時の処理
+  const handleSearch = () => {
+    setCurrentPage(1);  // 検索時は1ページ目に戻る
+    performSearch();
+  };
+
+  // ページ変更時の処理
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // 総ページ数を計算
+  const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -158,7 +210,8 @@ export default function SearchPage() {
         {/* ローディング表示 */}
         {isLoading && (
           <div className="text-center py-12">
-            <p className="text-gray-500">読み込み中...</p>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p className="text-gray-500 mt-2">読み込み中...</p>
           </div>
         )}
 
@@ -171,55 +224,78 @@ export default function SearchPage() {
 
         {/* 検索結果エリア */}
         {!isLoading && !error && (
-          <div className="mb-6">
-            {/* ヘッダー: 件数と並び替え */}
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900">
-                {documents.length}件の結果
-              </h2>
-              <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                <option>並び替え: 更新日順</option>
-                <option>並び替え: 関連度順</option>
-              </select>
+          <>
+            <div className="mb-6">
+              {/* ヘッダー: 件数と並び替え */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-gray-900">
+                  {totalCount}件の結果
+                </h2>
+                <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                  <option>並び替え: 更新日順</option>
+                  <option>並び替え: 関連度順</option>
+                </select>
+              </div>
+
+              {/* ドキュメントカードのリスト */}
+              <div className="space-y-4">
+                {documents.length > 0 ? (
+                  documents.map((doc) => (
+                    <DocumentCard key={doc.id} document={doc} />
+                  ))
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500">検索結果が見つかりませんでした</p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* ドキュメントカードのリスト */}
-            <div className="space-y-4">
-              {documents.map((doc) => (
-                <DocumentCard key={doc.id} document={doc} />
-              ))}
-            </div>
-          </div>
+            {/* ページネーション */}
+            {documents.length > 0 && totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2">
+                {/* 前へボタン */}
+                <button
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 text-gray-500 hover:text-gray-700 disabled:text-gray-300"
+                >
+                  &lt;
+                </button>
+
+                {/* ページ番号ボタン */}
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const page = i + 1;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-4 py-2 rounded-lg ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+
+                {totalPages > 5 && <span className="px-3 py-2 text-gray-500">...</span>}
+
+                {/* 次へボタン */}
+                <button
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-2 text-gray-500 hover:text-gray-700 disabled:text-gray-300"
+                >
+                  &gt;
+                </button>
+              </div>
+            )}
+          </>
         )}
-
-        {/* ページネーション */}
-        <div className="flex items-center justify-center gap-2">
-          {/* 前へボタン */}
-          <button className="px-3 py-2 text-gray-500 hover:text-gray-700">
-            &lt;
-          </button>
-
-          {/* ページ番号ボタン */}
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">
-            1
-          </button>
-          <button className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-            2
-          </button>
-          <button className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-            3
-          </button>
-          <span className="px-3 py-2 text-gray-500">...</span>
-          <button className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-            10
-          </button>
-
-          {/* 次へボタン */}
-          <button className="px-3 py-2 text-gray-500 hover:text-gray-700">
-            &gt;
-          </button>
-        </div>
       </main>
     </div>
   );
-};
+}
