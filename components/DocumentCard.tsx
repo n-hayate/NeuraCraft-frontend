@@ -1,5 +1,8 @@
+'use client';
+
 import { Download } from 'lucide-react';
 import { KnowledgeDocument } from '@/types/knowledge';
+import { useFileDownload } from '@/hooks/useFileDownload';
 
 // 親コンポーネントから受け取るPropsの型定義
 interface DocumentCardProps {
@@ -17,13 +20,23 @@ const documentIcons = {
 // タグの色分け定義
 const tagColors = {
   finalProduct: 'bg-green-100 text-green-800',
-  challenge: 'bg-orange-100 text-orange-800',
-  ingredients: 'bg-blue-100 text-blue-800',
-  company: 'bg-purple-100 text-purple-800',
-  assignee: 'bg-gray-100 text-gray-800',
+  issue: 'bg-orange-100 text-orange-800',
+  ingredient: 'bg-blue-100 text-blue-800',
+  customer: 'bg-purple-100 text-purple-800',
+  author: 'bg-gray-100 text-gray-800',
 };
 
 export const DocumentCard = ({ document }: DocumentCardProps) => {
+  // カスタムフックを使用してダウンロード機能を取得
+  const { downloadFile, isDownloading, error } = useFileDownload();
+
+  /**
+   * ダウンロードボタンクリック時の処理
+   */
+  const handleDownload = async () => {
+    await downloadFile(document.id, document.title);
+  };
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
       <div className="flex gap-4">
@@ -56,27 +69,46 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
               最終製品: {document.finalProduct}
             </span>
             {/* 課題感タグ */}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.challenge}`}>
-              課題感: {document.challenge}
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.issue}`}>
+              課題感: {document.issue}
             </span>
             {/* 使用原料タグ */}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.ingredients}`}>
-              使用原料: {document.ingredients}
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.ingredient}`}>
+              使用原料: {document.ingredient}
             </span>
-            {/* 顧客タグ */}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.company}`}>
-              顧客: {document.company}
+            {/* 提案企業タグ */}
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.customer}`}>
+              提案企業: {document.customer}
+            </span>
+            {/* 試作IDタグ */}
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+              試作ID: {document.trialId}
             </span>
             {/* 担当者タグ */}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.assignee}`}>
-              担当者: {document.assignee}
-            </span>
+            {document.author && (
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.author}`}>
+                担当者: {document.author}
+              </span>
+            )}
           </div>
 
+          {/* エラーメッセージ表示 */}
+          {error && (
+            <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
           {/* ダウンロードボタン */}
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
             <Download className="w-4 h-4" />
-            <span className="text-sm font-medium">ダウンロード</span>
+            <span className="text-sm font-medium">
+              {isDownloading ? 'ダウンロード中...' : 'ダウンロード'}
+            </span>
           </button>
         </div>
 
