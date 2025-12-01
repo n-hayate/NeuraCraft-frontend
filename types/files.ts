@@ -64,10 +64,3 @@ export interface DashboardResponse {
   ingredient_ranking: IngredientRankingItem[];
   issue_word_cloud: IssueWordCloud;
 }
-
-// ダウンロードURLレスポンス
-export interface DownloadUrlResponse {
-  download_url: string;
-  file_id: string;
-  filename: string;
-}
