@@ -13,7 +13,6 @@ export interface KnowledgeDocument {
   trialId: string;         // 試作ID (API: trial_id)
   author?: string;         // 開発担当者 (API: author)
   updatedAt: string;       // 更新日時
-  thumbnailUrl?: string;   // サムネイル画像のURL（オプショナル）
   fileUrl: string;         // ファイルのダウンロードURL
 }
 

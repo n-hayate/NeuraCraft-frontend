@@ -111,17 +111,6 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
             </span>
           </button>
         </div>
-
-        {/* 右側: サムネイル */}
-        {document.thumbnailUrl && (
-          <div className="w-48 h-32 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-            <img
-              src={document.thumbnailUrl}
-              alt={document.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
       </div>
     </div>
   );
