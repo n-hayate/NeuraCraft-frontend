@@ -23,7 +23,6 @@ const mockDocuments: KnowledgeDocument[] = [
     trialId: 'AB01',
     author: '鈴木一郎',
     updatedAt: '2023-10-27',
-    thumbnailUrl: 'https://via.placeholder.com/192x128',
     fileUrl: '/files/report1.pdf',
   },
   {
@@ -37,7 +36,6 @@ const mockDocuments: KnowledgeDocument[] = [
     trialId: 'FT02',
     author: '佐藤花子',
     updatedAt: '2023-09-15',
-    thumbnailUrl: 'https://via.placeholder.com/192x128',
     fileUrl: '/files/trial2.xlsx',
   },
   {
@@ -51,7 +49,6 @@ const mockDocuments: KnowledgeDocument[] = [
     trialId: 'OY03',
     author: '高橋健太',
     updatedAt: '2023-08-01',
-    thumbnailUrl: 'https://via.placeholder.com/192x128',
     fileUrl: '/files/proposal3.pdf',
   },
 ];
@@ -108,7 +105,6 @@ export default function SearchPage() {
       trialId: file.trial_id || '',
       author: file.author || '',
       updatedAt: new Date(file.updated_at).toISOString().split('T')[0],
-      thumbnailUrl: 'https://via.placeholder.com/192x128',
       fileUrl: file.azure_blob_url,
     };
   };

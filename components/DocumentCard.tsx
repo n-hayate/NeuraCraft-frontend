@@ -1,8 +1,10 @@
 'use client';
 
-import { Download } from 'lucide-react';
+import { Download, Eye } from 'lucide-react';
 import { KnowledgeDocument } from '@/types/knowledge';
 import { useFileDownload } from '@/hooks/useFileDownload';
+import { filesApi } from '@/api/files';
+import { useState } from 'react';
 
 // 親コンポーネントから受け取るPropsの型定義
 interface DocumentCardProps {
@@ -29,13 +31,37 @@ const tagColors = {
 export const DocumentCard = ({ document }: DocumentCardProps) => {
   // カスタムフックを使用してダウンロード機能を取得
   const { downloadFile, isDownloading, error } = useFileDownload();
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
   /**
    * ダウンロードボタンクリック時の処理
    */
   const handleDownload = async () => {
-    await downloadFile(document.id, document.title);
+    // Azure Blob URLを直接使用
+    await downloadFile(document.fileUrl, document.title);
   };
+
+  /**
+   * プレビューボタンクリック時の処理
+   */
+  const handlePreview = async () => {
+    setIsLoadingPreview(true);
+    try {
+      // バックエンドからプレビューURLを取得
+      const { preview_url } = await filesApi.getPreviewUrl(document.id);
+
+      // 新しいタブでOffice Viewerを開く
+      window.open(preview_url, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      console.error('Preview error:', err);
+      alert('プレビューの表示に失敗しました');
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
+
+  // PDFとOfficeファイルのみプレビュー可能
+  const canPreview = ['pdf', 'word', 'excel', 'powerpoint'].includes(document.type);
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
@@ -99,29 +125,35 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
             </div>
           )}
 
-          {/* ダウンロードボタン */}
-          <button
-            onClick={handleDownload}
-            disabled={isDownloading}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            <Download className="w-4 h-4" />
-            <span className="text-sm font-medium">
-              {isDownloading ? 'ダウンロード中...' : 'ダウンロード'}
-            </span>
-          </button>
-        </div>
+          {/* ボタンエリア */}
+          <div className="flex gap-2">
+            {/* プレビューボタン */}
+            {canPreview && (
+              <button
+                onClick={handlePreview}
+                disabled={isLoadingPreview}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                <Eye className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  {isLoadingPreview ? '読み込み中...' : 'プレビュー'}
+                </span>
+              </button>
+            )}
 
-        {/* 右側: サムネイル */}
-        {document.thumbnailUrl && (
-          <div className="w-48 h-32 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-            <img
-              src={document.thumbnailUrl}
-              alt={document.title}
-              className="w-full h-full object-cover"
-            />
+            {/* ダウンロードボタン */}
+            <button
+              onClick={handleDownload}
+              disabled={isDownloading}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              <Download className="w-4 h-4" />
+              <span className="text-sm font-medium">
+                {isDownloading ? 'ダウンロード中...' : 'ダウンロード'}
+              </span>
+            </button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import { FileRead, DashboardResponse, FileSearchParams, FileSearchResponse, DownloadUrlResponse } from '@/types/files';
+import { FileRead, DashboardResponse, FileSearchParams, FileSearchResponse } from '@/types/files';
 
 // ファイルAPIの関数をまとめたオブジェクト
 export const filesApi = {
@@ -48,9 +48,12 @@ export const filesApi = {
     await apiClient.delete(`/files/${id}`);
   },
 
-  // ダウンロードURL取得
-  getDownloadUrl: async (id: string) => {
-    const response = await apiClient.post<DownloadUrlResponse>(`/files/${id}/download`);
+  // プレビューURL取得（Office Viewer用）
+  getPreviewUrl: async (id: string) => {
+    const response = await apiClient.get<{
+      preview_url: string;
+      expires_at: string;
+    }>(`/files/${id}/preview-url`);
     return response.data;
   },
 };
