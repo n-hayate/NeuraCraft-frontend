@@ -105,7 +105,7 @@ export default function SearchPage() {
       trialId: file.trial_id || '',
       author: file.author || '',
       updatedAt: new Date(file.updated_at).toISOString().split('T')[0],
-      fileUrl: file.blob_path || '',
+      fileUrl: file.id, // ダウンロードはファイルIDを使用（実際のダウンロードURLは動的に取得）
     };
   };
 
@@ -126,7 +126,7 @@ export default function SearchPage() {
         // フィルター検索またはキーワード検索
         result = await filesApi.search({
           q: debouncedSearchQuery || undefined,
-          final_product: debouncedFilters.finalProduct,
+          application: debouncedFilters.finalProduct,
           issue: debouncedFilters.issue,
           ingredient: debouncedFilters.ingredient,
           customer: debouncedFilters.customer,

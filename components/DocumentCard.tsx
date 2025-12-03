@@ -37,7 +37,7 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
    * ダウンロードボタンクリック時の処理
    */
   const handleDownload = async () => {
-    // Azure Blob URLを直接使用
+    // ファイルIDを使用してダウンロード
     await downloadFile(document.fileUrl, document.title);
   };
 

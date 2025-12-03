@@ -19,7 +19,7 @@ export interface FileRead {
 // ファイル検索のフィルター条件（バックエンドAPI仕様に準拠）
 export interface FileSearchParams {
   q?: string;              // 検索キーワード（ファイル名での部分一致検索）
-  final_product?: string;
+  application?: string;    // 最終製品(バックエンドのフィールド名に合わせた)
   issue?: string;
   ingredient?: string;
   customer?: string;
