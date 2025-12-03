@@ -51,12 +51,12 @@ export const MetadataTable = ({ documents, onEdit }: MetadataTableProps) => {
 
               {/* 課題感 */}
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-700">{doc.challenge}</div>
+                <div className="text-sm text-gray-700">{doc.issue}</div>
               </td>
 
               {/* 顧客 */}
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-700">{doc.company}</div>
+                <div className="text-sm text-gray-700">{doc.customer}</div>
               </td>
 
               {/* 更新日時 */}

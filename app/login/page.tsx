@@ -70,9 +70,16 @@ export default function LoginPage() {
 
       // ログイン成功後、検索画面へ遷移
       router.push('/search');
-    } catch (error) {
+    } catch (error: any) {
       // ログイン失敗時のエラーメッセージを設定
-      setErrors({ email: 'ログインに失敗しました' });
+      console.error('Login error:', error);
+
+      // エラーメッセージを適切に設定
+      const errorMessage = error?.response?.status === 401
+        ? 'メールアドレスまたはパスワードが正しくありません'
+        : error?.message || 'ログインに失敗しました。もう一度お試しください。';
+
+      setErrors({ password: errorMessage });
     } finally {
       // 成功・失敗に関わらずローディングを終了
       setIsLoading(false);

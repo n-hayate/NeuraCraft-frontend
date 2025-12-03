@@ -2,23 +2,18 @@
 export interface FileRead {
   id: string;
   owner_id: number;
-  original_filename: string;
-  blob_name: string;
-  content_type: string;
-  file_size: number;
-  azure_blob_url: string;
+  original_name: string; // バックエンドの実際のフィールド名
+  blob_path: string; // バックエンドの実際のフィールド名
   created_at: string;
   updated_at: string;
   // メタデータフィールド
-  final_product?: string; // 最終製品
+  application?: string; // 最終製品（バックエンドの実際のフィールド名）
   issue?: string; // 課題
   ingredient?: string; // 成分
   customer?: string; // 顧客
   trial_id?: string; // 試作ID
   author?: string; // 著者
   status?: string; // ステータス
-  file_extension?: string; // ファイル拡張子
-  download_count?: number; // ダウンロード回数
 }
 
 // ファイル検索のフィルター条件（バックエンドAPI仕様に準拠）

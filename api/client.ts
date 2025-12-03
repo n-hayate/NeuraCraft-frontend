@@ -40,8 +40,12 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // トークンを削除
       localStorage.removeItem('authToken');
-      // ログインページにリダイレクト
-      window.location.href = '/login';
+
+      // 既にログインページにいる場合はリダイレクトしない
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+        // ログインページにリダイレクト
+        window.location.href = '/login';
+      }
     }
 
     // エラーをPromise.rejectで返す

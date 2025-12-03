@@ -19,7 +19,6 @@ const mockDocuments: KnowledgeDocument[] = [
     trialId: 'TRIAL-001',
     author: '鈴木一郎',
     updatedAt: '2023-10-27',
-    thumbnailUrl: 'https://via.placeholder.com/192x128',
     fileUrl: '/files/report1.pdf',
   },
   {
@@ -33,7 +32,6 @@ const mockDocuments: KnowledgeDocument[] = [
     trialId: 'TRIAL-002',
     author: '佐藤花子',
     updatedAt: '2023-09-15',
-    thumbnailUrl: 'https://via.placeholder.com/192x128',
     fileUrl: '/files/trial2.docx',
   },
   {
@@ -47,7 +45,6 @@ const mockDocuments: KnowledgeDocument[] = [
     trialId: 'TRIAL-003',
     author: '高橋健太',
     updatedAt: '2023-08-01',
-    thumbnailUrl: 'https://via.placeholder.com/192x128',
     fileUrl: '/files/proposal3.pptx',
   },
 ];
