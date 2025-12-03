@@ -59,10 +59,10 @@ export const filesApi = {
 
   // ダウンロードURL取得（SAS URL）
   getDownloadUrl: async (id: string) => {
-    const response = await apiClient.get<{
+    const response = await apiClient.post<{
       download_url: string;
       expires_at: string;
-    }>(`/files/${id}/download-url`);
+    }>(`/files/${id}/download`);
     return response.data;
   },
 };
