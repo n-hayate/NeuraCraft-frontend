@@ -56,4 +56,13 @@ export const filesApi = {
     }>(`/files/${id}/preview-url`);
     return response.data;
   },
+
+  // ダウンロードURL取得（SAS URL）
+  getDownloadUrl: async (id: string) => {
+    const response = await apiClient.post<{
+      download_url: string;
+      expires_at: string;
+    }>(`/files/${id}/download`);
+    return response.data;
+  },
 };

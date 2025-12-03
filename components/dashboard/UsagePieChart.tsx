@@ -46,7 +46,7 @@ export const UsagePieChart = ({ data }: UsagePieChartProps) => {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={sortedData}
+              data={sortedData as any}
               cx="50%"
               cy="50%"
               innerRadius={60}
@@ -79,24 +79,6 @@ export const UsagePieChart = ({ data }: UsagePieChartProps) => {
               layout="vertical"
               iconType="circle"
               wrapperStyle={{ color: "#64748B" }}
-              payload={legendPayload}
-              formatter={(value, entry: any) => {
-                const { payload } = entry;
-                // 全体の合計を計算してパーセンテージを表示
-                const total = sortedData.reduce(
-                  (sum, item) => sum + Number(item.count),
-                  0
-                );
-                const percent = Math.round(
-                  (Number(payload.count) / total) * 100
-                );
-                return (
-                  <span className="text-gray-600 ml-2">
-                    {value}{" "}
-                    <span className="text-gray-400 ml-1">{percent}%</span>
-                  </span>
-                );
-              }}
             />
           </PieChart>
         </ResponsiveContainer>

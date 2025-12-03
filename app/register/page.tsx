@@ -124,11 +124,11 @@ export default function FileRegisterPage() {
       // FormDataを作成してファイルとメタデータを設定
       const uploadData = new FormData();
 
-      // ファイルは 'uploaded_file' という名前で送信（バックエンドの要求に合わせる）
+      // ファイルは 'uploaded_file' という名前で送信（バックエンドの実装に合わせる）
       uploadData.append('uploaded_file', formData.file);
 
       // メタデータフィールドを追加
-      uploadData.append('final_product', formData.finalProduct);
+      uploadData.append('application', formData.finalProduct);
       uploadData.append('issue', formData.challenge);
       uploadData.append('ingredient', formData.ingredients);
       uploadData.append('customer', formData.company);

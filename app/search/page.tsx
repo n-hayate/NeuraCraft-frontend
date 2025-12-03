@@ -80,32 +80,32 @@ export default function SearchPage() {
 
   // バックエンドのFileReadをKnowledgeDocumentに変換
   const convertFileToDocument = (file: FileRead): KnowledgeDocument => {
-    // content_typeからファイルタイプを判定（undefinedの場合は空文字列）
-    const contentType = file.content_type || '';
+    // ファイル名の拡張子からファイルタイプを判定
+    const filename = file.original_name || '';
     let docType: KnowledgeDocument['type'] = 'pdf';
 
-    if (contentType.includes('pdf')) {
+    if (filename.endsWith('.pdf')) {
       docType = 'pdf';
-    } else if (contentType.includes('word') || contentType.includes('document')) {
+    } else if (filename.endsWith('.docx') || filename.endsWith('.doc')) {
       docType = 'word';
-    } else if (contentType.includes('sheet') || contentType.includes('excel')) {
+    } else if (filename.endsWith('.xlsx') || filename.endsWith('.xls')) {
       docType = 'excel';
-    } else if (contentType.includes('presentation') || contentType.includes('powerpoint')) {
+    } else if (filename.endsWith('.pptx') || filename.endsWith('.ppt')) {
       docType = 'powerpoint';
     }
 
     return {
       id: file.id,
-      title: file.original_filename,
+      title: file.original_name,
       type: docType,
-      finalProduct: file.final_product || '',
+      finalProduct: file.application || '',
       issue: file.issue || '',
       ingredient: file.ingredient || '',
       customer: file.customer || '',
       trialId: file.trial_id || '',
       author: file.author || '',
       updatedAt: new Date(file.updated_at).toISOString().split('T')[0],
-      fileUrl: file.azure_blob_url,
+      fileUrl: file.id, // ダウンロードはファイルIDを使用（実際のダウンロードURLは動的に取得）
     };
   };
 
@@ -126,7 +126,7 @@ export default function SearchPage() {
         // フィルター検索またはキーワード検索
         result = await filesApi.search({
           q: debouncedSearchQuery || undefined,
-          final_product: debouncedFilters.finalProduct,
+          application: debouncedFilters.finalProduct,
           issue: debouncedFilters.issue,
           ingredient: debouncedFilters.ingredient,
           customer: debouncedFilters.customer,

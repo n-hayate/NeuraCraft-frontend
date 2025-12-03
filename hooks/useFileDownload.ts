@@ -1,13 +1,14 @@
 import { useState } from 'react';
+import { filesApi } from '@/api/files';
 
 interface UseFileDownloadReturn {
-  downloadFile: (fileUrl: string, fileName: string) => Promise<void>;
+  downloadFile: (fileId: string, fileName: string) => Promise<void>;
   isDownloading: boolean;
   error: string | null;
 }
 
 /**
- * Azure Blob Storageから直接ファイルをダウンロードするカスタムフック
+ * バックエンドAPIを使用してファイルをダウンロードするカスタムフック
  */
 export const useFileDownload = (): UseFileDownloadReturn => {
   const [isDownloading, setIsDownloading] = useState(false);
@@ -15,17 +16,20 @@ export const useFileDownload = (): UseFileDownloadReturn => {
 
   /**
    * ファイルをダウンロードする関数
-   * @param fileUrl - Azure Blob StorageのURL（azure_blob_url）
+   * @param fileId - ファイルID
    * @param fileName - ダウンロード時のファイル名
    */
-  const downloadFile = async (fileUrl: string, fileName: string) => {
+  const downloadFile = async (fileId: string, fileName: string) => {
     setIsDownloading(true);
     setError(null);
 
     try {
-      // Azure Blob StorageのURLから直接ダウンロード
+      // バックエンドからダウンロードURLを取得
+      const { download_url } = await filesApi.getDownloadUrl(fileId);
+
+      // 取得したURLを使用してダウンロード
       const link = document.createElement('a');
-      link.href = fileUrl;
+      link.href = download_url;
       link.download = fileName;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
