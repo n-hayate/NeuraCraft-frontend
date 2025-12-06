@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { SearchBar } from '@/components/SearchBar';
-import { FilterBar } from '@/components/FilterBar';
 import { DocumentCard } from '@/components/DocumentCard';
-import { KnowledgeDocument, SearchFilters } from '@/types/knowledge';
+import { KnowledgeDocument } from '@/types/knowledge';
 import { filesApi } from '@/api/files';
 import { FileRead } from '@/types/files';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -57,9 +56,6 @@ export default function SearchPage() {
   // 検索キーワードを管理
   const [searchQuery, setSearchQuery] = useState('');
 
-  // フィルター条件を管理
-  const [filters, setFilters] = useState<SearchFilters>({});
-
   // 検索結果のドキュメントリストを管理
   const [documents, setDocuments] = useState<KnowledgeDocument[]>(mockDocuments);
 
@@ -74,8 +70,7 @@ export default function SearchPage() {
   const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 10;
 
-  // デバウンス処理: フィルターの変更を300ms遅延
-  const debouncedFilters = useDebounce(filters, 300);
+  // デバウンス処理: 検索キーワードの変更を300ms遅延
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // バックエンドのFileReadをKnowledgeDocumentに変換
@@ -117,21 +112,12 @@ export default function SearchPage() {
     setError(null);
 
     try {
-      // フィルターまたは検索キーワードが存在するかチェック
-      const hasFilters = Object.values(debouncedFilters).some(v => v);
-
       let result;
 
-      if (hasFilters || debouncedSearchQuery) {
-        // フィルター検索またはキーワード検索
+      if (debouncedSearchQuery) {
+        // キーワード検索
         result = await filesApi.search({
-          q: debouncedSearchQuery || undefined,
-          application: debouncedFilters.finalProduct,
-          issue: debouncedFilters.issue,
-          ingredient: debouncedFilters.ingredient,
-          customer: debouncedFilters.customer,
-          trial_id: debouncedFilters.trialId,
-          author: debouncedFilters.author,
+          q: debouncedSearchQuery,
           page: currentPage,
           page_size: itemsPerPage,
         });
@@ -162,11 +148,11 @@ export default function SearchPage() {
     }
   };
 
-  // デバウンスされたフィルターまたはページが変更されたら自動で検索
+  // デバウンスされた検索キーワードまたはページが変更されたら自動で検索
   useEffect(() => {
     performSearch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedFilters, debouncedSearchQuery, currentPage]);
+  }, [debouncedSearchQuery, currentPage]);
 
   // 検索ボタンクリック時の処理
   const handleSearch = () => {
@@ -196,11 +182,6 @@ export default function SearchPage() {
             onChange={setSearchQuery}
             onSearch={handleSearch}
           />
-        </div>
-
-        {/* フィルターバー */}
-        <div className="mb-6">
-          <FilterBar filters={filters} onChange={setFilters} />
         </div>
 
         {/* ローディング表示 */}
