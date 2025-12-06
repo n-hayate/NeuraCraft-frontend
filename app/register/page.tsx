@@ -48,6 +48,29 @@ export default function FileRegisterPage() {
   // ファイル選択状態（選択済みかどうか）
   const [fileSelected, setFileSelected] = useState(false);
 
+  /**
+   * ファイル名からメタデータを自動抽出する関数
+   * ファイル名の形式: 最終製品_課題感_使用原料_提案企業_試作ID_開発担当者
+   * 例: カルボナーラソース_凝固防止、分離防止_エマヒートLV、D-34、シミコマーズ_C社_ID3294_荒木
+   */
+  const parseFileNameToMetadata = (fileName: string) => {
+    // 拡張子を除去
+    const nameWithoutExtension = fileName.replace(/\.(pdf|xlsx?|xls)$/i, '');
+
+    // アンダースコアで分割
+    const parts = nameWithoutExtension.split('_');
+
+    // 各パートを対応するフィールドにマッピング
+    return {
+      finalProduct: parts[0]?.trim() || '',    // 最終製品
+      challenge: parts[1]?.trim() || '',       // 課題感
+      ingredients: parts[2]?.trim() || '',     // 使用原料
+      company: parts[3]?.trim() || '',         // 提案企業
+      trialId: parts[4]?.trim() || '',         // 試作ID
+      assignee: parts[5]?.trim() || '',        // 開発担当者
+    };
+  };
+
   // ファイル選択時の処理
   const handleFileSelect = (file: File) => {
     // 許可するファイル形式のリスト
@@ -63,8 +86,15 @@ export default function FileRegisterPage() {
       return;
     }
 
-    // ファイルをフォームデータに追加
-    setFormData({ ...formData, file });
+    // ファイル名からメタデータを自動抽出
+    const metadata = parseFileNameToMetadata(file.name);
+
+    // ファイルとメタデータをフォームデータに設定
+    setFormData({
+      ...formData,
+      file,
+      ...metadata,  // メタデータを自動入力
+    });
 
     // ファイル選択完了フラグを立てる
     setFileSelected(true);
