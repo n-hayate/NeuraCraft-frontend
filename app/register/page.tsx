@@ -124,7 +124,7 @@ export default function FileRegisterPage() {
       // FormDataを作成してファイルとメタデータを設定
       const uploadData = new FormData();
 
-      // ファイルは 'uploaded_file' という名前で送信（バックエンドの実装に合わせる）
+      // ファイルは 'uploaded_file' という名前で送信（Swagger UIで確認した仕様に合わせる）
       uploadData.append('uploaded_file', formData.file);
 
       // メタデータフィールドを追加
@@ -137,6 +137,12 @@ export default function FileRegisterPage() {
       // 開発担当者が入力されている場合のみ追加
       if (formData.assignee) {
         uploadData.append('author', formData.assignee);
+      }
+
+      // デバッグ: FormDataの内容を確認
+      console.log('FormData entries:');
+      for (const [key, value] of uploadData.entries()) {
+        console.log(`- ${key}:`, value instanceof File ? `File(${value.name})` : value);
       }
 
       // filesApi.create()を使ってアップロード
