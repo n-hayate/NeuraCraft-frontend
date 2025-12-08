@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { LayoutWrapper } from '@/components/layout/LayoutWrapper'
 
 export const metadata: Metadata = {
   title: '食品開発ナレッジベース - NeuraCraft',
@@ -13,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body className="bg-gray-50 text-gray-900">{children}</body>
+      <body className="bg-gray-50 text-gray-900">
+        <LayoutWrapper>{children}</LayoutWrapper>
+      </body>
     </html>
   )
 }
