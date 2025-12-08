@@ -47,6 +47,16 @@ export interface IngredientRankingItem {
   count: number;
 }
 
+export interface DownloadRankingItem {
+  name: string;
+  count: number;
+}
+
+export interface TrendDataItem {
+  date: string; // YYYY-MM-DD形式
+  count: number;
+}
+
 export interface IssueWordCloud {
   [key: string]: number;
 }
@@ -58,4 +68,8 @@ export interface DashboardResponse {
   usage_ranking: UsageRankingItem[];
   ingredient_ranking: IngredientRankingItem[];
   issue_word_cloud: IssueWordCloud;
+  // 新規追加フィールド
+  downloads_this_month: number; // 今月のダウンロード数
+  top_downloads_last_week: DownloadRankingItem[]; // 先週のダウンロード数Top3
+  registration_trend: TrendDataItem[]; // 登録件数推移
 }

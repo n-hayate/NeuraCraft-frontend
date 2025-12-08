@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { FileText, Plus } from "lucide-react";
+import { FileText, Plus, Download } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { UsagePieChart } from "@/components/dashboard/UsagePieChart";
-import { IngredientBarChart } from "@/components/dashboard/IngredientBarChart";
+import { DownloadRankingList } from "@/components/dashboard/DownloadRankingList";
+import { RegistrationTrendChart } from "@/components/dashboard/RegistrationTrendChart";
 import { KeywordCloud } from "@/components/dashboard/KeywordCloud";
 import { DashboardResponse } from "@/types/files";
 import { filesApi } from "@/api/files";
@@ -84,31 +84,35 @@ export default function DashboardPlaygroundPage() {
         </div>
 
         {/* 統計カードセクション */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatCard
-            title="総レポート数"
+            title="今月の新規登録数"
+            value={data.new_files_last_month.toLocaleString()}
+            icon={<Plus />}
+          />
+          <StatCard
+            title="今月のダウンロード数"
+            value={data.downloads_this_month.toLocaleString()}
+            icon={<Download />}
+          />
+          <StatCard
+            title="総登録件数"
             value={data.total_files.toLocaleString()}
             icon={<FileText />}
           />
-          <StatCard
-            title="今月の新規"
-            value={`+${data.new_files_last_month}`}
-            subText=""
-            icon={<Plus />}
-          />
         </div>
 
-        {/* グラフセクション上段 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:h-[400px]">
-          <div className="h-[400px] lg:h-full">
-            <UsagePieChart data={data.usage_ranking} />
+        {/* リストとグラフセクション */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <DownloadRankingList data={data.top_downloads_last_week} />
           </div>
-          <div className="h-[400px] lg:h-full">
-            <IngredientBarChart data={data.ingredient_ranking} />
+          <div>
+            <RegistrationTrendChart data={data.registration_trend} />
           </div>
         </div>
 
-        {/* グラフセクション下段（ワードクラウド） */}
+        {/* ワードインプレッション */}
         <div className="h-[300px]">
           <KeywordCloud data={data.issue_word_cloud} />
         </div>
