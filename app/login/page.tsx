@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, FlaskConical } from 'lucide-react';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import Image from 'next/image';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 
 export default function LoginPage() {
@@ -87,83 +86,105 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[#F7F7F7] flex items-center justify-center px-4">
+      <div className="w-full max-w-[506px]">
         {/* ロゴとタイトル */}
-        <div className="text-center mb-8">
-          {/* フラスコアイコンを円形の背景に配置 */}
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-secondary rounded-full mb-4">
-            <FlaskConical className="w-10 h-10 text-primary" />
+        <div className="text-center">
+          {/* 会社ロゴ */}
+          <div className="mb-5">
+            <Image
+              src="/img/logo.png"
+              alt="Company Logo"
+              width={80}
+              height={74}
+              className="mx-auto"
+            />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-[30px] font-bold text-[#333333] mb-10">
             食品開発ナレッジベース
           </h1>
         </div>
 
         {/* ログインフォーム */}
-        <div className="bg-white rounded-2xl shadow-sm p-8">
-          <h2 className="text-xl font-bold text-center mb-6">ログイン</h2>
+        <div className="bg-white rounded-[10px] shadow-[0px_2px_8px_rgba(0,0,0,0.08)] p-10 border border-[#D9D9D9] w-full">
+          <h2 className="text-[24px] font-bold text-[#333333] mb-[30px]">ログイン</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* メールアドレス入力 */}
-            <Input
-              label="アカウントIDまたはメールアドレス"
-              type="email"
-              placeholder="IDまたはメールアドレスを入力"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              error={errors.email}
-              required
-            />
-
-            {/* パスワード入力（表示/非表示切替ボタン付き） */}
-            <div className="relative">
-              <Input
-                label="パスワード"
-                type={showPassword ? 'text' : 'password'}  // 条件によってtypeを切り替え
-                placeholder="パスワードを入力"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                error={errors.password}
+            <div>
+              <label className="block text-[16px] font-normal text-[#333333] mb-2">
+                アカウントIDまたはメールアドレス
+              </label>
+              <input
+                type="email"
+                placeholder="IDまたはメールアドレスを入力"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full h-[56px] bg-white border border-[#D9D9D9] rounded-[10px] px-4 text-[16px] placeholder:text-[#A5A5A5] focus:outline-none focus:ring-2 focus:ring-[#5F6E86] focus:border-transparent"
                 required
               />
-              {/* パスワード表示切替ボタン */}
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-[38px] text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5" />  // パスワード非表示アイコン
-                ) : (
-                  <Eye className="w-5 h-5" />     // パスワード表示アイコン
-                )}
-              </button>
+              {errors.email && (
+                <p className="text-[14px] text-[#FF4D4F] mt-2">※{errors.email}</p>
+              )}
+            </div>
+
+            {/* パスワード入力（表示/非表示切替ボタン付き） */}
+            <div>
+              <label className="block text-[16px] font-normal text-[#333333] mb-2">
+                パスワード
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="パスワードを入力"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full h-[56px] bg-white border border-[#D9D9D9] rounded-[10px] px-4 pr-12 text-[16px] placeholder:text-[#A5A5A5] focus:outline-none focus:ring-2 focus:ring-[#5F6E86] focus:border-transparent"
+                  required
+                />
+                {/* パスワード表示切替ボタン */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-[14px] text-[#FF4D4F] mt-2">※{errors.password}</p>
+              )}
             </div>
 
             {/* ログインボタン */}
-            <Button
-              type="submit"
-              fullWidth
-              isLoading={isLoading}
-            >
-              ログイン
-            </Button>
+            <div className="pt-[10px]">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-[56px] bg-[#5F6E86] text-white text-[20px] font-bold rounded-[10px] hover:bg-[#4A5568] disabled:bg-[#A5A5A5] disabled:cursor-not-allowed transition-colors"
+              >
+                {isLoading ? 'ログイン中...' : 'ログイン'}
+              </button>
+            </div>
           </form>
 
           {/* パスワード忘れリンク */}
-          <div className="mt-4 text-center">
+          <div className="mt-5 text-center">
             <a
               href="#"
-              className="text-sm text-primary hover:underline"
+              className="text-[16px] text-[#2E938C] hover:underline"
             >
-              パスワードをお忘れの場合
+              パスワードを忘れた場合
             </a>
           </div>
         </div>
 
         {/* コピーライト */}
-        <p className="text-center text-sm text-gray-500 mt-8">
+        <p className="text-center text-[12px] text-[#A5A5A5] mt-[30px]">
           © Example Company 2024
         </p>
       </div>

@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { Upload, CheckCircle } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
-import { Input } from '@/components/ui/Input';
+import { SuccessModal } from '@/components/ui/SuccessModal';
 
 // フォームデータの型定義
 interface FileUploadForm {
@@ -40,13 +39,16 @@ export default function FileRegisterPage() {
   // ドラッグ中フラグ（視覚的フィードバック用）
   const [isDragging, setIsDragging] = useState(false);
 
+  // ファイル選択状態（選択済みかどうか）
+  const [fileSelected, setFileSelected] = useState(false);
+
+  // ポップアップ表示制御
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
   // フォーム入力変更時の処理
   const handleInputChange = (field: keyof FileUploadForm, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
-
-  // ファイル選択状態（選択済みかどうか）
-  const [fileSelected, setFileSelected] = useState(false);
 
   /**
    * ファイル名からメタデータを自動抽出する関数
@@ -136,6 +138,27 @@ export default function FileRegisterPage() {
     }
   };
 
+  // ポップアップ閉じる処理
+  const handleCloseModal = () => {
+    setShowSuccessModal(false);
+
+    // フォームリセット
+    setFormData({
+      finalProduct: '',
+      challenge: '',
+      ingredients: '',
+      company: '',
+      trialId: '',
+      assignee: '',
+      file: null,
+    });
+    setFileSelected(false);
+    setUploadSuccess(false);
+
+    // ページトップにスクロール
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // フォーム送信時の処理
   const handleSubmit = async (e: React.FormEvent) => {
     // デフォルトのフォーム送信を防止
@@ -179,21 +202,10 @@ export default function FileRegisterPage() {
       const { filesApi } = await import('@/api/files');
       const response = await filesApi.create(uploadData);
 
-      // 成功時の処理
-      setUploadedFileName((response as any).filename || 'ファイル名取得失敗');
-      setUploadSuccess(true);
+      // 成功時の処理: ポップアップ表示
+      setUploadedFileName(formData.file.name);
+      setShowSuccessModal(true);
 
-      // フォームリセット
-      setFormData({
-        finalProduct: '',
-        challenge: '',
-        ingredients: '',
-        company: '',
-        trialId: '',
-        assignee: '',
-        file: null,
-      });
-      setFileSelected(false);
     } catch (error) {
       console.error('Upload error:', error);
       alert('アップロードに失敗しました。もう一度お試しください。');
@@ -203,158 +215,199 @@ export default function FileRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className="min-h-screen bg-[#F7F7F7]">
+      {/* Headerは削除。Sidebarはlayoutで追加される */}
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">
-          新規ナレッジ登録
-        </h1>
+      <main className="p-10">
+        <div className="max-w-[800px] mx-auto">
+          {/* ページタイトル */}
+          <h1 className="text-[32px] font-bold text-[#333333] mb-[30px]">
+            新規ナレッジ登録
+          </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* メタ情報入力セクション */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-lg font-bold mb-6">メタ情報入力</h2>
+          <form onSubmit={handleSubmit} className="space-y-[30px]">
+            {/* ファイルアップロードセクション */}
+            <div>
+              {/* ドラッグ&ドロップエリア */}
+              <div
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                className={`
+                  bg-white border-[3px] border-dashed rounded-[10px] p-[60px_0] h-[224px]
+                  flex flex-col items-center justify-center transition-all
+                  ${isDragging ? 'border-[#588DFF] bg-[#E6F0FF]' : 'border-[#A1A1A1]'}
+                `}
+              >
+                {/* アップロードアイコン */}
+                <Upload className="w-[48px] h-[48px] text-[#A5A5A5] mb-4" />
 
-            {/* 2列グリッドレイアウト */}
-            <div className="grid grid-cols-2 gap-6">
-              <Input
-                label="最終製品"
-                placeholder="最終製品名を入力"
-                value={formData.finalProduct}
-                onChange={(e) => handleInputChange('finalProduct', e.target.value)}
-                required
-              />
+                <p className="text-[16px] text-[#333333] mb-2">
+                  ファイルをドラッグ&ドロップ
+                </p>
+                <p className="text-[14px] text-[#A5A5A5] mb-4">または</p>
 
-              <Input
-                label="課題感"
-                placeholder="課題を入力"
-                value={formData.challenge}
-                onChange={(e) => handleInputChange('challenge', e.target.value)}
-                required
-              />
+                {/* ファイル選択ボタン */}
+                <label className="inline-block">
+                  <input
+                    type="file"
+                    accept=".pdf,.xls,.xlsx"
+                    onChange={handleFileInput}
+                    className="hidden"
+                  />
+                  <span className="inline-flex items-center justify-center w-[180px] h-[48px] bg-[#5F6E86] text-white text-[16px] font-bold rounded-lg cursor-pointer hover:bg-[#4A5568] transition-colors">
+                    ファイルを選択
+                  </span>
+                </label>
 
-              <Input
-                label="使用原料"
-                placeholder="使用した原料を入力"
-                value={formData.ingredients}
-                onChange={(e) => handleInputChange('ingredients', e.target.value)}
-                required
-              />
+                <p className="text-[12px] text-[#A5A5A5] mt-4">
+                  Excel または PDF ファイルをアップロードしてください。
+                </p>
+              </div>
 
-              <Input
-                label="提案企業（顧客）"
-                placeholder="顧客名を入力"
-                value={formData.company}
-                onChange={(e) => handleInputChange('company', e.target.value)}
-                required
-              />
-
-              <Input
-                label="試作ID"
-                placeholder="IDを入力"
-                value={formData.trialId}
-                onChange={(e) => handleInputChange('trialId', e.target.value)}
-                required
-              />
-
-              <Input
-                label="開発担当者"
-                placeholder="担当者名を入力"
-                value={formData.assignee}
-                onChange={(e) => handleInputChange('assignee', e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* ファイルアップロードセクション */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-lg font-bold mb-6">ファイルアップロード</h2>
-
-            {/* ドラッグ&ドロップエリア */}
-            <div
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              className={`
-                border-2 border-dashed rounded-lg p-12 text-center
-                transition-colors
-                ${isDragging ? 'border-primary bg-secondary/20' : 'border-gray-300'}
-              `}
-            >
-              {/* アップロードアイコン */}
-              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-
-              <p className="text-gray-600 mb-2">
-                ファイルをドラッグ&ドロップ
-              </p>
-              <p className="text-gray-500 text-sm mb-4">または</p>
-
-              {/* ファイル選択ボタン */}
-              <label className="inline-block">
-                <input
-                  type="file"
-                  accept=".pdf,.xls,.xlsx"
-                  onChange={handleFileInput}
-                  className="hidden"  // input要素を非表示にしてlabelをボタンとして使用
-                />
-                <span className="px-6 py-3 bg-secondary text-primary rounded-lg cursor-pointer hover:bg-secondary/80 inline-block">
-                  ファイルを選択
-                </span>
-              </label>
-
-              <p className="text-sm text-gray-500 mt-4">
-                Excel または PDF ファイルをアップロードしてください。
-              </p>
+              {/* ファイル選択完了メッセージ */}
+              {fileSelected && !uploadSuccess && formData.file && (
+                <div className="mt-4 p-4 bg-[#E6F7FF] border border-[#91D5FF] rounded-lg flex items-start gap-3">
+                  <CheckCircle className="w-6 h-6 text-[#1890FF] flex-shrink-0" />
+                  <div>
+                    <p className="text-[16px] font-bold text-[#0050B3]">
+                      ファイルが選択されました
+                    </p>
+                    <p className="text-[14px] text-[#0050B3] mt-1">
+                      ファイル名: {formData.file.name}
+                    </p>
+                    <p className="text-[14px] text-[#0050B3] mt-1">
+                      メタ情報を入力して「登録する」ボタンを押してください。
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* ファイル選択完了メッセージ */}
-            {fileSelected && !uploadSuccess && formData.file && (
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-blue-600" />
+            {/* メタ情報入力セクション */}
+            <div className="bg-white border border-[#D9D9D9] rounded-[10px] p-[30px]">
+              <h2 className="text-[20px] font-bold text-[#333333] mb-6">メタ情報入力</h2>
+
+              {/* 2列グリッドレイアウト */}
+              <div className="grid grid-cols-2 gap-x-[40px] gap-y-6">
+                {/* 最終製品 */}
                 <div>
-                  <p className="text-blue-800 font-medium">
-                    ファイルが選択されました
-                  </p>
-                  <p className="text-blue-700 text-sm">
-                    ファイル名: {formData.file.name}
-                  </p>
-                  <p className="text-blue-700 text-sm mt-1">
-                    メタ情報を入力して「登録する」ボタンを押してください。
-                  </p>
+                  <label className="block text-[16px] font-bold text-[#333333] mb-2">
+                    最終製品 <span className="text-[#FF4D4F]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="最終製品名を入力"
+                    value={formData.finalProduct}
+                    onChange={(e) => handleInputChange('finalProduct', e.target.value)}
+                    className="w-full h-[40px] border border-[#A1A1A1] rounded-[10px] px-4 text-[14px] text-[#333333] placeholder:text-[#A5A5A5]"
+                    required
+                  />
+                </div>
+
+                {/* 課題感 */}
+                <div>
+                  <label className="block text-[16px] font-bold text-[#333333] mb-2">
+                    課題感 <span className="text-[#FF4D4F]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="課題を入力"
+                    value={formData.challenge}
+                    onChange={(e) => handleInputChange('challenge', e.target.value)}
+                    className="w-full h-[40px] border border-[#A1A1A1] rounded-[10px] px-4 text-[14px] text-[#333333] placeholder:text-[#A5A5A5]"
+                    required
+                  />
+                </div>
+
+                {/* 使用原料 */}
+                <div>
+                  <label className="block text-[16px] font-bold text-[#333333] mb-2">
+                    使用原料 <span className="text-[#FF4D4F]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="使用した原料を入力"
+                    value={formData.ingredients}
+                    onChange={(e) => handleInputChange('ingredients', e.target.value)}
+                    className="w-full h-[40px] border border-[#A1A1A1] rounded-[10px] px-4 text-[14px] text-[#333333] placeholder:text-[#A5A5A5]"
+                    required
+                  />
+                </div>
+
+                {/* 提案企業（顧客） */}
+                <div>
+                  <label className="block text-[16px] font-bold text-[#333333] mb-2">
+                    提案企業（顧客） <span className="text-[#FF4D4F]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="顧客名を入力"
+                    value={formData.company}
+                    onChange={(e) => handleInputChange('company', e.target.value)}
+                    className="w-full h-[40px] border border-[#A1A1A1] rounded-[10px] px-4 text-[14px] text-[#333333] placeholder:text-[#A5A5A5]"
+                    required
+                  />
+                </div>
+
+                {/* 試作ID */}
+                <div>
+                  <label className="block text-[16px] font-bold text-[#333333] mb-2">
+                    試作ID <span className="text-[#FF4D4F]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="IDを入力"
+                    value={formData.trialId}
+                    onChange={(e) => handleInputChange('trialId', e.target.value)}
+                    className="w-full h-[40px] border border-[#A1A1A1] rounded-[10px] px-4 text-[14px] text-[#333333] placeholder:text-[#A5A5A5]"
+                    required
+                  />
+                </div>
+
+                {/* 開発担当者 */}
+                <div>
+                  <label className="block text-[16px] font-bold text-[#333333] mb-2">
+                    開発担当者
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="担当者名を入力"
+                    value={formData.assignee}
+                    onChange={(e) => handleInputChange('assignee', e.target.value)}
+                    className="w-full h-[40px] border border-[#A1A1A1] rounded-[10px] px-4 text-[14px] text-[#333333] placeholder:text-[#A5A5A5]"
+                  />
                 </div>
               </div>
-            )}
-            
+            </div>
 
-            {/* アップロード成功メッセージ */}
-            {uploadSuccess && (
-              <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <div>
-                  <p className="text-green-800 font-medium">
-                    ナレッジの登録が完了しました！
-                  </p>
-                  <p className="text-green-700 text-sm">
-                    登録ファイル名: {uploadedFileName}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 登録ボタン */}
-          <div className="mt-8 flex justify-center">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="px-16 py-4 text-lg font-bold shadow-lg hover:shadow-xl bg-gray-200 text-black hover:bg-gray-300 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? '登録中...' : '登録する'}
-            </button>
-          </div>
-        </form>
+            {/* 登録ボタン */}
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                disabled={isLoading || !formData.file}
+                className={`
+                  w-[267px] h-[56px] text-[20px] font-bold rounded-[10px]
+                  transition-colors
+                  ${isLoading || !formData.file
+                    ? 'bg-[#EFEFEF] text-[#A5A5A5] cursor-not-allowed'
+                    : 'bg-[#FFCB06] text-white hover:bg-[#E6B800]'
+                  }
+                `}
+              >
+                {isLoading ? '登録中...' : '登録する'}
+              </button>
+            </div>
+          </form>
+        </div>
       </main>
+
+      {/* 登録完了ポップアップ */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        fileName={uploadedFileName}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }
