@@ -68,7 +68,7 @@ export default function SearchPage() {
   // ページネーション
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const itemsPerPage = 10;
+  const itemsPerPage = 20;
 
   // デバウンス処理: 検索キーワードの変更を300ms遅延
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -106,43 +106,33 @@ export default function SearchPage() {
 
   /**
    * 検索を実行する関数
+   *
+   * 注意: getAll APIは配列のみを返し、総件数を返さないため、
+   * キーワードの有無にかかわらず search APIを使用する。
+   * search APIは total_count を返すため、ページネーションが正しく動作する。
    */
   const performSearch = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      let result;
+      // キーワードの有無にかかわらず、search APIを使用
+      const result = await filesApi.search({
+        q: debouncedSearchQuery || undefined,  // 空文字列の場合はundefinedを渡す（全件検索）
+        page: currentPage,
+        page_size: itemsPerPage,
+      });
 
-      if (debouncedSearchQuery) {
-        // キーワード検索
-        result = await filesApi.search({
-          q: debouncedSearchQuery,
-          page: currentPage,
-          page_size: itemsPerPage,
-        });
-
-        const docs = result.files.map(convertFileToDocument);
-        setDocuments(docs);
-        setTotalCount(result.total_count);
-      } else {
-        // 全件取得
-        const files = await filesApi.getAll({
-          limit: itemsPerPage,
-          offset: (currentPage - 1) * itemsPerPage,
-        });
-
-        const docs = files.map(convertFileToDocument);
-        setDocuments(docs);
-        // 全件取得の場合は総件数が分からないため、取得件数をセット
-        setTotalCount(files.length);
-      }
+      const docs = result.files.map(convertFileToDocument);
+      setDocuments(docs);
+      setTotalCount(result.total_count);  // 正しい総件数を取得
 
     } catch (err) {
       console.error('Search failed:', err);
       setError('検索に失敗しました');
       // エラー時はモックデータを表示
       setDocuments(mockDocuments);
+      setTotalCount(mockDocuments.length);
     } finally {
       setIsLoading(false);
     }
@@ -160,9 +150,59 @@ export default function SearchPage() {
     performSearch();
   };
 
+  /**
+   * ページネーションのページ番号配列を生成する関数
+   * @param currentPage 現在のページ番号
+   * @param totalPages 総ページ数
+   * @returns ページ番号の配列（'...'を含む）
+   */
+  const generatePageNumbers = (currentPage: number, totalPages: number): (number | string)[] => {
+    const pages: (number | string)[] = [];
+
+    // 総ページ数が7以下の場合、すべて表示
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+      return pages;
+    }
+
+    // 常に最初のページを追加
+    pages.push(1);
+
+    // 現在のページが先頭付近（1-4ページ）
+    if (currentPage <= 4) {
+      for (let i = 2; i <= 5; i++) {
+        pages.push(i);
+      }
+      pages.push('...');
+      pages.push(totalPages);
+    }
+    // 現在のページが最終付近（最終-3ページ以降）
+    else if (currentPage >= totalPages - 3) {
+      pages.push('...');
+      for (let i = totalPages - 4; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    }
+    // 現在のページが中間
+    else {
+      pages.push('...');
+      for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+        pages.push(i);
+      }
+      pages.push('...');
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
   // ページ変更時の処理
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    // ページトップにスムーススクロール
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // 総ページ数を計算
@@ -228,43 +268,52 @@ export default function SearchPage() {
               </div>
             </div>
 
-            {/* ページネーション */}
+            {/* ページネーション（改善版） */}
             {documents.length > 0 && totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2 mt-6">
                 {/* 前へボタン */}
                 <button
                   onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-2 text-gray-500 hover:text-gray-700 disabled:text-gray-300"
+                  className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="前のページへ"
                 >
                   &lt;
                 </button>
 
                 {/* ページ番号ボタン */}
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const page = i + 1;
+                {generatePageNumbers(currentPage, totalPages).map((page, index) => {
+                  if (page === '...') {
+                    return (
+                      <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-500">
+                        ...
+                      </span>
+                    );
+                  }
+
                   return (
                     <button
                       key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`px-4 py-2 rounded-lg ${
+                      onClick={() => handlePageChange(page as number)}
+                      className={`min-w-[40px] px-4 py-2 rounded-lg border transition-colors ${
                         currentPage === page
-                          ? 'bg-blue-600 text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-100'
                       }`}
+                      aria-label={`${page}ページへ`}
+                      aria-current={currentPage === page ? 'page' : undefined}
                     >
                       {page}
                     </button>
                   );
                 })}
 
-                {totalPages > 5 && <span className="px-3 py-2 text-gray-500">...</span>}
-
                 {/* 次へボタン */}
                 <button
                   onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-2 text-gray-500 hover:text-gray-700 disabled:text-gray-300"
+                  className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="次のページへ"
                 >
                   &gt;
                 </button>
