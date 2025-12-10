@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
+import { AuthHeader } from '@/components/layout/AuthHeader';
 
 export default function LoginPage() {
   // useRouter: プログラムでページ遷移を行うためのフック（Next.js App Router）
@@ -86,24 +86,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F7F7] flex items-center justify-center px-4">
-      <div className="w-full max-w-[506px]">
-        {/* ロゴとタイトル */}
-        <div className="text-center">
-          {/* 会社ロゴ */}
-          <div className="mb-5">
-            <Image
-              src="/img/logo.png"
-              alt="Company Logo"
-              width={80}
-              height={74}
-              className="mx-auto"
-            />
-          </div>
-          <h1 className="text-[30px] font-bold text-[#333333] mb-10">
-            食品開発ナレッジベース
-          </h1>
-        </div>
+    <div className="min-h-screen bg-[#F7F7F7] flex flex-col">
+      {/* ヘッダー */}
+      <AuthHeader />
+
+      {/* メインコンテンツ */}
+      <div className="flex-1 flex items-center justify-center px-4">
+        <div className="w-full max-w-[506px]">
 
         {/* ログインフォーム */}
         <div className="bg-white rounded-[10px] shadow-[0px_2px_8px_rgba(0,0,0,0.08)] p-10 border border-[#D9D9D9] w-full">
@@ -183,10 +172,11 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* コピーライト */}
-        <p className="text-center text-[12px] text-[#A5A5A5] mt-[30px]">
-          © Example Company 2024
-        </p>
+          {/* コピーライト */}
+          <p className="text-center text-[12px] text-[#A5A5A5] mt-[30px]">
+            © Example Company 2024
+          </p>
+        </div>
       </div>
     </div>
   );
