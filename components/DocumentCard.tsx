@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, Eye } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { KnowledgeDocument } from '@/types/knowledge';
 import { useFileDownload } from '@/hooks/useFileDownload';
 import { filesApi } from '@/api/files';
@@ -82,8 +82,26 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
               </div>
 
               {/* ファイル名（クリック可能） */}
-              <h3 className="text-lg font-bold text-blue-600 hover:underline cursor-pointer">
+              <h3
+                className={`text-lg font-bold text-blue-600 hover:underline cursor-pointer ${
+                  isLoadingPreview ? 'opacity-50 cursor-wait' : ''
+                }`}
+                onClick={handlePreview}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handlePreview();
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`${document.title}をプレビュー`}
+                aria-busy={isLoadingPreview}
+              >
                 {document.title}
+                {isLoadingPreview && (
+                  <span className="ml-2 text-sm text-gray-500">(読み込み中...)</span>
+                )}
               </h3>
             </div>
           </div>
@@ -127,20 +145,6 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
 
           {/* ボタンエリア */}
           <div className="flex gap-2">
-            {/* プレビューボタン */}
-            {canPreview && (
-              <button
-                onClick={handlePreview}
-                disabled={isLoadingPreview}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                <Eye className="w-4 h-4" />
-                <span className="text-sm font-medium">
-                  {isLoadingPreview ? '読み込み中...' : 'プレビュー'}
-                </span>
-              </button>
-            )}
-
             {/* ダウンロードボタン */}
             <button
               onClick={handleDownload}
