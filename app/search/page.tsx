@@ -8,6 +8,7 @@ import { KnowledgeDocument } from '@/types/knowledge';
 import { filesApi } from '@/api/files';
 import { FileRead } from '@/types/files';
 import { useDebounce } from '@/hooks/useDebounce';
+import { SORT_OPTIONS, DEFAULT_SORT_BY } from '@/constants/sortOptions';
 
 // モックデータ（開発用のダミーデータ）
 const mockDocuments: KnowledgeDocument[] = [
@@ -70,6 +71,9 @@ export default function SearchPage() {
   const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 20;
 
+  // ソート順の状態
+  const [sortBy, setSortBy] = useState<string>(DEFAULT_SORT_BY);
+
   // デバウンス処理: 検索キーワードの変更を300ms遅延
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
@@ -121,6 +125,7 @@ export default function SearchPage() {
         q: debouncedSearchQuery || undefined,  // 空文字列の場合はundefinedを渡す（全件検索）
         page: currentPage,
         page_size: itemsPerPage,
+        sort_by: sortBy,  // ソート順を追加
       });
 
       const docs = result.files.map(convertFileToDocument);
@@ -138,11 +143,11 @@ export default function SearchPage() {
     }
   };
 
-  // デバウンスされた検索キーワードまたはページが変更されたら自動で検索
+  // デバウンスされた検索キーワード、ページ、ソート順が変更されたら自動で検索
   useEffect(() => {
     performSearch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearchQuery, currentPage]);
+  }, [debouncedSearchQuery, currentPage, sortBy]);
 
   // 検索ボタンクリック時の処理
   const handleSearch = () => {
@@ -205,6 +210,14 @@ export default function SearchPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  /**
+   * ソート順変更時の処理
+   */
+  const handleSortChange = (newSortBy: string) => {
+    setSortBy(newSortBy);
+    setCurrentPage(1);  // ページ番号を1にリセット
+  };
+
   // 総ページ数を計算
   const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
 
@@ -248,10 +261,26 @@ export default function SearchPage() {
                 <h2 className="text-lg font-bold text-gray-900">
                   {totalCount}件の結果
                 </h2>
-                <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                  <option>並び替え: 更新日順</option>
-                  <option>並び替え: 関連度順</option>
-                </select>
+
+                {/* 並び替えドロップダウン */}
+                <div className="flex items-center gap-2">
+                  <label htmlFor="sort-select" className="text-sm font-bold text-gray-700">
+                    並べ替え:
+                  </label>
+                  <select
+                    id="sort-select"
+                    value={sortBy}
+                    onChange={(e) => handleSortChange(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+                    aria-label="検索結果の並び替え"
+                  >
+                    {SORT_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* ドキュメントカードのリスト */}
