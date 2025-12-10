@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown, Settings } from 'lucide-react';
+import { AppHeader } from '@/components/layout/AppHeader';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { MetadataTable } from '@/components/MetadataTable';
 import { KnowledgeDocument } from '@/types/knowledge';
@@ -73,15 +74,23 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* サイドバー */}
-      <Sidebar activeMenu={activeMenu} onMenuChange={setActiveMenu} />
+    <div className="min-h-screen bg-gray-50">
+      {/* ヘッダー */}
+      <AppHeader
+        title="メタデータ管理"
+        icon={
+          <div className="w-10 h-10 bg-[#FFCB06] rounded-full flex items-center justify-center">
+            <Settings className="w-6 h-6 text-white" />
+          </div>
+        }
+      />
 
-      {/* メインコンテンツ */}
-      <main className="flex-1 p-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">
-          メタデータ管理
-        </h1>
+      <div className="flex">
+        {/* サイドバー */}
+        <Sidebar activeMenu={activeMenu} onMenuChange={setActiveMenu} />
+
+        {/* メインコンテンツ */}
+        <main className="flex-1 p-8">
 
         {/* 検索とフィルターエリア */}
         <div className="mb-6 space-y-4">
@@ -111,9 +120,10 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* メタデータテーブル */}
-        <MetadataTable documents={documents} onEdit={handleEdit} />
-      </main>
+          {/* メタデータテーブル */}
+          <MetadataTable documents={documents} onEdit={handleEdit} />
+        </main>
+      </div>
     </div>
   );
 };

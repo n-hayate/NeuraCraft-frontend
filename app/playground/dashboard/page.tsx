@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { FileText, Plus, Download } from "lucide-react";
+import { FileText, Plus, Download, BarChart3 } from "lucide-react";
+import { AppHeader } from "@/components/layout/AppHeader";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { DownloadRankingList } from "@/components/dashboard/DownloadRankingList";
 import { RegistrationTrendChart } from "@/components/dashboard/RegistrationTrendChart";
@@ -63,25 +64,26 @@ export default function DashboardPlaygroundPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 text-gray-900 font-sans">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* ヘッダー部分 */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            
-              ダッシュボード
-            </h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* ヘッダー */}
+      <AppHeader
+        title="ダッシュボード"
+        icon={
+          <div className="w-10 h-10 bg-[#FFCB06] rounded-full flex items-center justify-center">
+            <BarChart3 className="w-6 h-6 text-white" />
           </div>
+        }
+      />
 
+      <div className="p-8 text-gray-900 font-sans">
+        <div className="max-w-7xl mx-auto space-y-8">
           {/* フィルター（期間のみ） */}
-          <div className="flex gap-4">
+          <div className="flex justify-end gap-4">
             <div className="bg-white border border-gray-200 rounded px-3 py-1.5 text-sm text-gray-700 flex items-center gap-2 shadow-sm">
               <span>2024年1月 - 2024年6月</span>
               <span className="text-gray-400">📅</span>
             </div>
           </div>
-        </div>
 
         {/* 統計カードセクション */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -112,9 +114,10 @@ export default function DashboardPlaygroundPage() {
           </div>
         </div>
 
-        {/* ワードインプレッション */}
-        <div className="h-[300px]">
-          <KeywordCloud data={data.issue_word_cloud} />
+          {/* ワードインプレッション */}
+          <div className="h-[300px]">
+            <KeywordCloud data={data.issue_word_cloud} />
+          </div>
         </div>
       </div>
     </div>
