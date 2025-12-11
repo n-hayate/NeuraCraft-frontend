@@ -8,7 +8,6 @@ import { DocumentCard } from '@/components/DocumentCard';
 import { KnowledgeDocument } from '@/types/knowledge';
 import { filesApi } from '@/api/files';
 import { FileRead } from '@/types/files';
-import { useDebounce } from '@/hooks/useDebounce';
 import { SORT_OPTIONS, DEFAULT_SORT_BY } from '@/constants/sortOptions';
 
 // モックデータ（開発用のダミーデータ）
@@ -75,9 +74,6 @@ export default function SearchPage() {
   // ソート順の状態
   const [sortBy, setSortBy] = useState<string>(DEFAULT_SORT_BY);
 
-  // デバウンス処理: 検索キーワードの変更を300ms遅延
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
-
   // バックエンドのFileReadをKnowledgeDocumentに変換
   const convertFileToDocument = (file: FileRead): KnowledgeDocument => {
     // ファイル名の拡張子からファイルタイプを判定
@@ -123,10 +119,10 @@ export default function SearchPage() {
     try {
       // キーワードの有無にかかわらず、search APIを使用
       const result = await filesApi.search({
-        q: debouncedSearchQuery || undefined,  // 空文字列の場合はundefinedを渡す（全件検索）
+        q: searchQuery || undefined,  // 空文字列の場合はundefinedを渡す（全件検索）
         page: currentPage,
         page_size: itemsPerPage,
-        sort_by: sortBy,  // ソート順を追加
+        sort_by: sortBy,
       });
 
       const docs = result.files.map(convertFileToDocument);
@@ -144,11 +140,11 @@ export default function SearchPage() {
     }
   };
 
-  // デバウンスされた検索キーワード、ページ、ソート順が変更されたら自動で検索
+  // ページまたはソート順が変更されたら自動で検索（初期表示時も実行）
   useEffect(() => {
     performSearch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearchQuery, currentPage, sortBy]);
+  }, [currentPage, sortBy]);
 
   // 検索ボタンクリック時の処理
   const handleSearch = () => {

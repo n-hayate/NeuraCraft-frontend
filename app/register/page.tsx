@@ -57,7 +57,7 @@ export default function FileRegisterPage() {
    */
   const parseFileNameToMetadata = (fileName: string) => {
     // 拡張子を除去
-    const nameWithoutExtension = fileName.replace(/\.(pdf|xlsx?|xls)$/i, '');
+    const nameWithoutExtension = fileName.replace(/\.(pdf|xlsx?|xls|pptx?|ppt|docx?|doc)$/i, '');
 
     // アンダースコアで分割
     const parts = nameWithoutExtension.split('_');
@@ -80,11 +80,15 @@ export default function FileRegisterPage() {
       'application/pdf',                                                      // PDF
       'application/vnd.ms-excel',                                            // Excel（古い形式）
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',  // Excel（新しい形式）
+      'application/vnd.ms-powerpoint',                                       // PowerPoint（旧形式）
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation', // PowerPoint（新形式）
+      'application/msword',                                                  // Word（旧形式）
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',   // Word（新形式）
     ];
 
     // ファイル形式チェック
     if (!allowedTypes.includes(file.type)) {
-      alert('Excel または PDF ファイルを選択してください');
+      alert('PDF、Excel、PowerPoint、Word ファイルを選択してください');
       return;
     }
 
@@ -251,7 +255,7 @@ export default function FileRegisterPage() {
                 <label className="inline-block">
                   <input
                     type="file"
-                    accept=".pdf,.xls,.xlsx"
+                    accept=".pdf,.xls,.xlsx,.ppt,.pptx,.doc,.docx"
                     onChange={handleFileInput}
                     className="hidden"
                   />
@@ -261,7 +265,7 @@ export default function FileRegisterPage() {
                 </label>
 
                 <p className="text-[12px] text-[#A5A5A5] mt-4">
-                  Excel または PDF ファイルをアップロードしてください。
+                  PDF、Excel、PowerPoint、Word ファイルをアップロードしてください。
                 </p>
               </div>
 

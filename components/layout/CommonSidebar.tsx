@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { Search, FileEdit, BarChart3, Settings, User, ChevronDown } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
+import Image from 'next/image';
 
 // メニュー項目の型定義
 interface MenuItem {
@@ -56,6 +57,18 @@ export const CommonSidebar = () => {
 
   return (
     <aside className="fixed left-0 top-0 w-[220px] h-screen bg-[#F7F7F7] flex flex-col z-10">
+      {/* ロゴエリア */}
+      <div className="py-[24px] px-[20px] flex items-center justify-center border-b border-[#D9D9D9]">
+        <Image
+          src="/logo/app_logo.png"
+          alt="NeuraCraft"
+          width={1377}
+          height={1376}
+          className="w-full h-auto max-w-[168px]"
+          priority
+        />
+      </div>
+
       {/* メニューエリア */}
       <nav className="flex-1 py-[30px] px-[10px] space-y-[40px]">
         {menuItems.map((item) => {
