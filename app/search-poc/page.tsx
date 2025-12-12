@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Search, Sparkles, X, Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { SearchBar } from "@/components/SearchBar";
 import { DocumentCard } from "@/components/DocumentCard";
@@ -76,7 +77,7 @@ export default function SearchPocPage() {
   const itemsPerPage = 20;
 
   // ソート順の状態
-  const [sortBy, setSortBy] = useState<string>(DEFAULT_SORT_BY);
+  const [sortBy, setSortBy] = useState<string>("relevance");
 
   // 検索が実行されたか（AIボタン表示用）
   const [hasSearched, setHasSearched] = useState(false);
@@ -506,10 +507,67 @@ export default function SearchPocPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
                   分析結果
                 </h3>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-gray-800 whitespace-pre-wrap">
-                    {aiAnalysisResult.answer}
-                  </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-none">
+                  <div className="prose prose-blue max-w-none text-gray-800">
+                    <ReactMarkdown
+                      components={{
+                        h1: ({ children }) => (
+                          <h1 className="text-2xl font-bold mb-4 mt-6">
+                            {children}
+                          </h1>
+                        ),
+                        h2: ({ children }) => (
+                          <h2 className="text-xl font-bold mb-3 mt-5">
+                            {children}
+                          </h2>
+                        ),
+                        h3: ({ children }) => (
+                          <h3 className="text-lg font-bold mb-2 mt-4">
+                            {children}
+                          </h3>
+                        ),
+                        p: ({ children }) => (
+                          <p className="mb-4 leading-relaxed">{children}</p>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="list-disc list-inside mb-4 space-y-1">
+                            {children}
+                          </ul>
+                        ),
+                        ol: ({ children }) => (
+                          <ol className="list-decimal list-inside mb-4 space-y-1">
+                            {children}
+                          </ol>
+                        ),
+                        li: ({ children }) => (
+                          <li className="ml-4">{children}</li>
+                        ),
+                        code: ({ children }) => (
+                          <code className="bg-gray-200 px-1 py-0.5 rounded text-sm font-mono">
+                            {children}
+                          </code>
+                        ),
+                        pre: ({ children }) => (
+                          <pre className="bg-gray-800 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4">
+                            {children}
+                          </pre>
+                        ),
+                        strong: ({ children }) => (
+                          <strong className="font-bold">{children}</strong>
+                        ),
+                        em: ({ children }) => (
+                          <em className="italic">{children}</em>
+                        ),
+                        blockquote: ({ children }) => (
+                          <blockquote className="border-l-4 border-blue-500 pl-4 italic my-4">
+                            {children}
+                          </blockquote>
+                        ),
+                      }}
+                    >
+                      {aiAnalysisResult.answer}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
 

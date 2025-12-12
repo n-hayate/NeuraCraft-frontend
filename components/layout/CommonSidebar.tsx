@@ -55,12 +55,16 @@ export const CommonSidebar = () => {
   // 現在のページがアクティブかどうかを判定
   const isActive = (path: string) => pathname === path;
 
+  // search-pocページの時だけ別のロゴを使用
+  const isSearchPocPage = pathname === '/search-poc';
+  const logoSrc = isSearchPocPage ? '/logo/Takumi-A1_logo.png' : '/logo/app_logo.png';
+
   return (
     <aside className="fixed left-0 top-0 w-[220px] h-screen bg-[#F7F7F7] flex flex-col z-10">
       {/* ロゴエリア */}
       <div className="py-[24px] px-[20px] flex items-center justify-center border-b border-[#D9D9D9]">
         <Image
-          src="/logo/app_logo.png"
+          src={logoSrc}
           alt="NeuraCraft"
           width={1377}
           height={1376}
