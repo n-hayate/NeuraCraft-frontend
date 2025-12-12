@@ -1,5 +1,6 @@
 import { FileEdit, Users, User } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
+import Image from 'next/image';
 
 // 親コンポーネントから受け取るPropsの型定義
 interface SidebarProps {
@@ -19,6 +20,18 @@ export const Sidebar = ({ activeMenu, onMenuChange }: SidebarProps) => {
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 min-h-screen">
+      {/* ロゴエリア */}
+      <div className="p-6 border-b border-gray-200 flex items-center justify-center">
+        <Image
+          src="/logo/app_logo.png"
+          alt="NeuraCraft"
+          width={160}
+          height={160}
+          className="w-auto h-auto max-w-[160px]"
+          priority
+        />
+      </div>
+
       {/* ユーザー情報エリア */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center gap-3">
