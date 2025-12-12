@@ -9,6 +9,7 @@ import { useState } from 'react';
 // 親コンポーネントから受け取るPropsの型定義
 interface DocumentCardProps {
   document: KnowledgeDocument;  // 表示するドキュメントのデータ
+  showDownloadButton?: boolean;  // ダウンロードボタンの表示/非表示（デフォルト: true）
 }
 
 // ドキュメントタイプごとのアイコン
@@ -28,7 +29,7 @@ const tagColors = {
   author: 'bg-gray-100 text-gray-800',
 };
 
-export const DocumentCard = ({ document }: DocumentCardProps) => {
+export const DocumentCard = ({ document, showDownloadButton = true }: DocumentCardProps) => {
   // カスタムフックを使用してダウンロード機能を取得
   const { downloadFile, isDownloading, error } = useFileDownload();
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
@@ -144,19 +145,21 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
           )}
 
           {/* ボタンエリア */}
-          <div className="flex gap-2">
-            {/* ダウンロードボタン */}
-            <button
-              onClick={handleDownload}
-              disabled={isDownloading}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              <Download className="w-4 h-4" />
-              <span className="text-sm font-medium">
-                {isDownloading ? 'ダウンロード中...' : 'ダウンロード'}
-              </span>
-            </button>
-          </div>
+          {showDownloadButton && (
+            <div className="flex gap-2">
+              {/* ダウンロードボタン */}
+              <button
+                onClick={handleDownload}
+                disabled={isDownloading}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                <Download className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  {isDownloading ? 'ダウンロード中...' : 'ダウンロード'}
+                </span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

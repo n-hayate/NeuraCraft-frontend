@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Search, LogOut, User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
+import Image from "next/image";
 import { useAuthStore } from "@/store/authStore";
 
 /**
@@ -22,11 +23,17 @@ export const MobileHeader = () => {
       <div className="flex items-center justify-between h-14 px-4">
         {/* 左側: ロゴとタイトル */}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#FFCB06] rounded-full flex items-center justify-center">
-            <Search className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 flex items-center justify-center">
+            <Image
+              src="/logo/app_logo.png"
+              alt="アプリロゴ"
+              width={48}
+              height={48}
+              className="object-contain"
+            />
           </div>
           <span className="text-base font-bold text-gray-900">
-            ナレッジ検索
+            モバイル検索
           </span>
         </div>
 

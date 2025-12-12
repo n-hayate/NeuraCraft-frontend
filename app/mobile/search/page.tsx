@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 import { MobileHeader } from "@/components/layout/MobileHeader";
 import { SearchBar } from "@/components/SearchBar";
-import { DocumentCard } from "@/components/DocumentCard";
+import { MobileDocumentCard } from "@/components/MobileDocumentCard";
 import { KnowledgeDocument } from "@/types/knowledge";
 import { filesApi } from "@/api/files";
 import { FileRead } from "@/types/files";
@@ -57,9 +57,8 @@ export default function MobileSearchPage() {
   // 検索キーワードを管理
   const [searchQuery, setSearchQuery] = useState("");
 
-  // 検索結果のドキュメントリストを管理
-  const [documents, setDocuments] =
-    useState<KnowledgeDocument[]>(mockDocuments);
+  // 検索結果のドキュメントリストを管理（初期値は空配列）
+  const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
 
   // ローディング状態
   const [isLoading, setIsLoading] = useState(false);
@@ -74,6 +73,9 @@ export default function MobileSearchPage() {
 
   // ソート順の状態
   const [sortBy, setSortBy] = useState<string>(DEFAULT_SORT_BY);
+
+  // 検索が実行されたかどうかを追跡
+  const [hasSearched, setHasSearched] = useState(false);
 
   // バックエンドのFileReadをKnowledgeDocumentに変換
   const convertFileToDocument = (file: FileRead): KnowledgeDocument => {
@@ -112,6 +114,7 @@ export default function MobileSearchPage() {
   const performSearch = async () => {
     setIsLoading(true);
     setError(null);
+    setHasSearched(true); // 検索が実行されたことを記録
 
     try {
       // キーワードの有無にかかわらず、search APIを使用
@@ -128,9 +131,9 @@ export default function MobileSearchPage() {
     } catch (err) {
       console.error("Search failed:", err);
       setError("検索に失敗しました");
-      // エラー時はモックデータを表示
-      setDocuments(mockDocuments);
-      setTotalCount(mockDocuments.length);
+      // エラー時は空配列を設定（モックデータは表示しない）
+      setDocuments([]);
+      setTotalCount(0);
     } finally {
       setIsLoading(false);
     }
@@ -219,8 +222,8 @@ export default function MobileSearchPage() {
 
       {/* メインコンテンツ */}
       <main className="px-4 py-4">
-        {/* 検索バー */}
-        <div className="mb-4">
+        {/* 検索バー（固定表示） */}
+        <div className="sticky top-14 z-40 bg-gray-50 py-3 -mx-4 px-4 mb-4 border-b border-gray-200">
           <SearchBar
             value={searchQuery}
             onChange={setSearchQuery}
@@ -244,45 +247,49 @@ export default function MobileSearchPage() {
           </div>
         )}
 
-        {/* 検索結果エリア */}
-        {!isLoading && !error && (
+        {/* 検索結果エリア（検索が実行された場合のみ表示） */}
+        {hasSearched && !isLoading && !error && (
           <>
             <div className="mb-4">
               {/* ヘッダー: 件数と並び替え */}
               <div className="flex flex-col gap-3 mb-4">
-                <h2 className="text-base font-bold text-gray-900">
-                  {totalCount}件の結果
-                </h2>
+                {totalCount > 0 && (
+                  <h2 className="text-base font-bold text-gray-900">
+                    {totalCount}件の結果
+                  </h2>
+                )}
 
-                {/* 並び替えドロップダウン（モバイル向けにフル幅） */}
-                <div className="flex items-center gap-2">
-                  <label
-                    htmlFor="sort-select-mobile"
-                    className="text-xs font-bold text-gray-700 whitespace-nowrap"
-                  >
-                    並べ替え:
-                  </label>
-                  <select
-                    id="sort-select-mobile"
-                    value={sortBy}
-                    onChange={(e) => handleSortChange(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
-                    aria-label="検索結果の並び替え"
-                  >
-                    {SORT_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {/* 並び替えドロップダウン（モバイル向けにフル幅、結果がある場合のみ表示） */}
+                {totalCount > 0 && (
+                  <div className="flex items-center gap-2">
+                    <label
+                      htmlFor="sort-select-mobile"
+                      className="text-xs font-bold text-gray-700 whitespace-nowrap"
+                    >
+                      並べ替え:
+                    </label>
+                    <select
+                      id="sort-select-mobile"
+                      value={sortBy}
+                      onChange={(e) => handleSortChange(e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+                      aria-label="検索結果の並び替え"
+                    >
+                      {SORT_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               {/* ドキュメントカードのリスト */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {documents.length > 0 ? (
                   documents.map((doc) => (
-                    <DocumentCard key={doc.id} document={doc} />
+                    <MobileDocumentCard key={doc.id} document={doc} />
                   ))
                 ) : (
                   <div className="text-center py-8">
