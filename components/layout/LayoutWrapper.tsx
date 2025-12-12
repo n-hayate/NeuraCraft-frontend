@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { usePathname } from 'next/navigation';
-import { CommonSidebar } from './CommonSidebar';
+import { usePathname } from "next/navigation";
+import { CommonSidebar } from "./CommonSidebar";
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -10,21 +10,21 @@ interface LayoutWrapperProps {
 /**
  * レイアウトラッパーコンポーネント
  * usePathnameを使用するためClient Componentとして実装
- * ログインページ以外ではサイドバーを表示
+ * ログインページとモバイル専用ページではサイドバーを表示しない
  */
 export const LayoutWrapper = ({ children }: LayoutWrapperProps) => {
   const pathname = usePathname();
 
-  // ログインページではサイドバーを表示しない
-  const showSidebar = pathname !== '/login';
+  // ログインページとモバイル専用ページではサイドバーを表示しない
+  const showSidebar = pathname !== "/login" && !pathname.startsWith("/mobile/");
 
   return (
     <div className="flex">
-      {/* サイドバー（ログインページ以外） */}
+      {/* サイドバー（ログインページとモバイルページ以外） */}
       {showSidebar && <CommonSidebar />}
 
       {/* メインコンテンツ */}
-      <main className={showSidebar ? 'ml-[220px] flex-1' : 'w-full'}>
+      <main className={showSidebar ? "ml-[220px] flex-1" : "w-full"}>
         {children}
       </main>
     </div>
