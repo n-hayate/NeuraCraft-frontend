@@ -9,6 +9,10 @@ import { KnowledgeDocument } from "@/types/knowledge";
 import { filesApi } from "@/api/files";
 import { FileRead } from "@/types/files";
 import { SORT_OPTIONS, DEFAULT_SORT_BY } from "@/constants/sortOptions";
+import {
+  performanceCollector,
+  formatPerformanceStats,
+} from "@/utils/performance";
 
 // モックデータ（開発用のダミーデータ）
 const mockDocuments: KnowledgeDocument[] = [
@@ -112,6 +116,9 @@ export default function MobileSearchPage() {
    * 検索を実行する関数
    */
   const performSearch = async () => {
+    // E2E時間の計測開始
+    const e2eStartTime = performance.now();
+
     setIsLoading(true);
     setError(null);
     setHasSearched(true); // 検索が実行されたことを記録
@@ -125,9 +132,32 @@ export default function MobileSearchPage() {
         sort_by: sortBy, // ソート順を追加
       });
 
-      const docs = result.files.map(convertFileToDocument);
+      const docs = result.data.files.map(convertFileToDocument);
       setDocuments(docs);
-      setTotalCount(result.total_count); // 正しい総件数を取得
+      setTotalCount(result.data.total_count); // 正しい総件数を取得
+
+      // E2E時間の計測終了（結果表示完了時点）
+      const e2eEndTime = performance.now();
+      const e2eTimeMs = Math.round(e2eEndTime - e2eStartTime);
+
+      // レスポンスヘッダーから処理時間を取得
+      const searchTimeMs = result.headers["X-Search-Time-ms"]
+        ? parseInt(result.headers["X-Search-Time-ms"], 10)
+        : null;
+      const serverTimeMs = result.headers["X-Server-Time-ms"]
+        ? parseInt(result.headers["X-Server-Time-ms"], 10)
+        : null;
+
+      // パフォーマンスデータを収集
+      performanceCollector.add({
+        e2eTimeMs,
+        searchTimeMs,
+        serverTimeMs,
+        timestamp: Date.now(),
+      });
+
+      // コンソールにパフォーマンス統計を出力
+      console.log(formatPerformanceStats());
     } catch (err) {
       console.error("Search failed:", err);
       setError("検索に失敗しました");

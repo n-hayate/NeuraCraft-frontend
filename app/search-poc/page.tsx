@@ -138,9 +138,9 @@ export default function SearchPocPage() {
         sort_by: sortBy, // ソート順を追加
       });
 
-      const docs = result.files.map(convertFileToDocument);
+      const docs = result.data.files.map(convertFileToDocument);
       setDocuments(docs);
-      setTotalCount(result.total_count); // 正しい総件数を取得
+      setTotalCount(result.data.total_count); // 正しい総件数を取得
     } catch (err) {
       console.error("Search failed:", err);
       setError("検索に失敗しました");

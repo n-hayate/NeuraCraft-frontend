@@ -24,12 +24,16 @@ export const KeywordCloud = ({ data }: KeywordCloudProps) => {
 
   // 色を計算する関数
   const getColor = (value: number) => {
-    // 頻度が高いほど目立つ色（赤・オレンジ系）、中間は青系、低いほどグレー
-    if (value > maxValue * 0.8) return "#DC2626"; // red-600
-    if (value > maxValue * 0.6) return "#EA580C"; // orange-600
-    if (value > maxValue * 0.4) return "#2563EB"; // blue-600
-    if (value > maxValue * 0.2) return "#0D9488"; // teal-600
-    return "#64748B"; // slate-500
+    // 頻度が高いほど目立つ色（赤・オレンジ系）、中間は緑・青系、低いほどグレー
+    // 閾値を下げて、より多くの色が使われるようにする
+    if (value > maxValue * 0.7) return "#DC2626"; // red-600 (高頻度)
+    if (value > maxValue * 0.5) return "#EA580C"; // orange-600
+    if (value > maxValue * 0.35) return "#F59E0B"; // amber-500
+    if (value > maxValue * 0.25) return "#10B981"; // emerald-500
+    if (value > maxValue * 0.15) return "#0D9488"; // teal-600
+    if (value > maxValue * 0.08) return "#2563EB"; // blue-600
+    if (value > maxValue * 0.04) return "#6366F1"; // indigo-500
+    return "#64748B"; // slate-500 (低頻度)
   };
 
   // ランダムな配置のためにシャッフル（簡易的）

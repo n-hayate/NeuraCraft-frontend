@@ -1,35 +1,38 @@
-'use client';
+"use client";
 
-import { Download } from 'lucide-react';
-import { KnowledgeDocument } from '@/types/knowledge';
-import { useFileDownload } from '@/hooks/useFileDownload';
-import { filesApi } from '@/api/files';
-import { useState } from 'react';
+import { Download } from "lucide-react";
+import { KnowledgeDocument } from "@/types/knowledge";
+import { useFileDownload } from "@/hooks/useFileDownload";
+import { filesApi } from "@/api/files";
+import { useState } from "react";
 
 // 親コンポーネントから受け取るPropsの型定義
 interface DocumentCardProps {
-  document: KnowledgeDocument;  // 表示するドキュメントのデータ
-  showDownloadButton?: boolean;  // ダウンロードボタンの表示/非表示（デフォルト: true）
+  document: KnowledgeDocument; // 表示するドキュメントのデータ
+  showDownloadButton?: boolean; // ダウンロードボタンの表示/非表示（デフォルト: true）
 }
 
 // ドキュメントタイプごとのアイコン
 const documentIcons = {
-  pdf: '📄',
-  word: '📝',
-  excel: '📊',
-  powerpoint: '📊',
+  pdf: "📄",
+  word: "📝",
+  excel: "📊",
+  powerpoint: "📊",
 };
 
 // タグの色分け定義
 const tagColors = {
-  finalProduct: 'bg-green-100 text-green-800',
-  issue: 'bg-orange-100 text-orange-800',
-  ingredient: 'bg-blue-100 text-blue-800',
-  customer: 'bg-purple-100 text-purple-800',
-  author: 'bg-gray-100 text-gray-800',
+  finalProduct: "bg-green-100 text-green-800",
+  issue: "bg-orange-100 text-orange-800",
+  ingredient: "bg-blue-100 text-blue-800",
+  customer: "bg-purple-100 text-purple-800",
+  author: "bg-gray-100 text-gray-800",
 };
 
-export const DocumentCard = ({ document, showDownloadButton = true }: DocumentCardProps) => {
+export const DocumentCard = ({
+  document,
+  showDownloadButton = true,
+}: DocumentCardProps) => {
   // カスタムフックを使用してダウンロード機能を取得
   const { downloadFile, isDownloading, error } = useFileDownload();
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
@@ -52,17 +55,19 @@ export const DocumentCard = ({ document, showDownloadButton = true }: DocumentCa
       const { preview_url } = await filesApi.getPreviewUrl(document.id);
 
       // 新しいタブでOffice Viewerを開く
-      window.open(preview_url, '_blank', 'noopener,noreferrer');
+      window.open(preview_url, "_blank", "noopener,noreferrer");
     } catch (err) {
-      console.error('Preview error:', err);
-      alert('プレビューの表示に失敗しました');
+      console.error("Preview error:", err);
+      alert("プレビューの表示に失敗しました");
     } finally {
       setIsLoadingPreview(false);
     }
   };
 
   // PDFとOfficeファイルのみプレビュー可能
-  const canPreview = ['pdf', 'word', 'excel', 'powerpoint'].includes(document.type);
+  const canPreview = ["pdf", "word", "excel", "powerpoint"].includes(
+    document.type
+  );
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
@@ -85,11 +90,11 @@ export const DocumentCard = ({ document, showDownloadButton = true }: DocumentCa
               {/* ファイル名（クリック可能） */}
               <h3
                 className={`text-lg font-bold text-blue-600 hover:underline cursor-pointer ${
-                  isLoadingPreview ? 'opacity-50 cursor-wait' : ''
+                  isLoadingPreview ? "opacity-50 cursor-wait" : ""
                 }`}
                 onClick={handlePreview}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
+                  if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     handlePreview();
                   }
@@ -101,7 +106,9 @@ export const DocumentCard = ({ document, showDownloadButton = true }: DocumentCa
               >
                 {document.title}
                 {isLoadingPreview && (
-                  <span className="ml-2 text-sm text-gray-500">(読み込み中...)</span>
+                  <span className="ml-2 text-sm text-gray-500">
+                    (読み込み中...)
+                  </span>
                 )}
               </h3>
             </div>
@@ -110,19 +117,27 @@ export const DocumentCard = ({ document, showDownloadButton = true }: DocumentCa
           {/* タグエリア */}
           <div className="flex flex-wrap gap-2 mb-4">
             {/* 最終製品タグ */}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.finalProduct}`}>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.finalProduct}`}
+            >
               最終製品: {document.finalProduct}
             </span>
             {/* 課題感タグ */}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.issue}`}>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.issue}`}
+            >
               課題感: {document.issue}
             </span>
             {/* 使用原料タグ */}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.ingredient}`}>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.ingredient}`}
+            >
               使用原料: {document.ingredient}
             </span>
             {/* 提案企業タグ */}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.customer}`}>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.customer}`}
+            >
               提案企業: {document.customer}
             </span>
             {/* 試作IDタグ */}
@@ -131,7 +146,9 @@ export const DocumentCard = ({ document, showDownloadButton = true }: DocumentCa
             </span>
             {/* 担当者タグ */}
             {document.author && (
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.author}`}>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-medium ${tagColors.author}`}
+              >
                 担当者: {document.author}
               </span>
             )}
@@ -155,7 +172,7 @@ export const DocumentCard = ({ document, showDownloadButton = true }: DocumentCa
               >
                 <Download className="w-4 h-4" />
                 <span className="text-sm font-medium">
-                  {isDownloading ? 'ダウンロード中...' : 'ダウンロード'}
+                  {isDownloading ? "ダウンロード中..." : "ダウンロード"}
                 </span>
               </button>
             </div>

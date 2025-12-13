@@ -15,7 +15,13 @@ export const filesApi = {
       params,
       timeout: 30000, // 検索APIは30秒のタイムアウトを設定
     });
-    return response.data;
+    return {
+      data: response.data,
+      headers: {
+        'X-Search-Time-ms': response.headers['x-search-time-ms'] || null,
+        'X-Server-Time-ms': response.headers['x-server-time-ms'] || null,
+      },
+    };
   },
 
   // 全件取得（ページネーション対応）
