@@ -17,15 +17,22 @@ import { useAuthStore } from '@/store/authStore';
 interface AppHeaderProps {
   title: string;          // ページタイトル（例: "食品開発ナレッジ検索"）
   icon?: React.ReactNode; // ページアイコン
+  helpLink?: string;      // ヘルプボタンのリンク先（指定された場合はリンクになる）
 }
 
-export const AppHeader = ({ title, icon }: AppHeaderProps) => {
+export const AppHeader = ({ title, icon, helpLink }: AppHeaderProps) => {
   const router = useRouter();
   const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
     logout();
     router.push('/login');
+  };
+
+  const handleHelpClick = () => {
+    if (helpLink) {
+      router.push(helpLink);
+    }
   };
 
   return (
@@ -40,7 +47,11 @@ export const AppHeader = ({ title, icon }: AppHeaderProps) => {
         {/* 右側: ユーザー情報とログアウト */}
         <div className="flex items-center gap-4">
           {/* ヘルプボタン */}
-          <button className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+          <button
+            onClick={handleHelpClick}
+            className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"
+            title={helpLink ? "POCページへ" : "ヘルプ"}
+          >
             <HelpCircle className="w-5 h-5" />
           </button>
 

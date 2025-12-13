@@ -228,6 +228,7 @@ export default function SearchPage() {
             <Search className="w-6 h-6 text-white" />
           </div>
         }
+        helpLink="/search-poc"
       />
 
       {/* メインコンテンツ */}
