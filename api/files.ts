@@ -11,7 +11,10 @@ export const filesApi = {
 
   // 検索機能（フィルター対応）
   search: async (params: FileSearchParams) => {
-    const response = await apiClient.get<FileSearchResponse>('/files/search', { params });
+    const response = await apiClient.get<FileSearchResponse>('/files/search', { 
+      params,
+      timeout: 30000, // 検索APIは30秒のタイムアウトを設定
+    });
     return response.data;
   },
 

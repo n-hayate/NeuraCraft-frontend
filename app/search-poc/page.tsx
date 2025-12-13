@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Search, Sparkles, X, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -9,7 +9,6 @@ import { DocumentCard } from "@/components/DocumentCard";
 import { KnowledgeDocument } from "@/types/knowledge";
 import { filesApi } from "@/api/files";
 import { FileRead } from "@/types/files";
-import { useDebounce } from "@/hooks/useDebounce";
 import { SORT_OPTIONS, DEFAULT_SORT_BY } from "@/constants/sortOptions";
 import { aiApi } from "@/api/ai";
 import { AIAnalysisResponse } from "@/types/ai";
@@ -89,9 +88,6 @@ export default function SearchPocPage() {
     useState<AIAnalysisResponse | null>(null);
   const [showAiModal, setShowAiModal] = useState(false);
 
-  // デバウンス処理: 検索キーワードの変更を300ms遅延
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
-
   // バックエンドのFileReadをKnowledgeDocumentに変換
   const convertFileToDocument = (file: FileRead): KnowledgeDocument => {
     // ファイル名の拡張子からファイルタイプを判定
@@ -137,7 +133,7 @@ export default function SearchPocPage() {
     try {
       // キーワードの有無にかかわらず、search APIを使用
       const result = await filesApi.search({
-        q: debouncedSearchQuery || undefined, // 空文字列の場合はundefinedを渡す（全件検索）
+        q: searchQuery || undefined, // 空文字列の場合はundefinedを渡す（全件検索）
         page: currentPage,
         page_size: itemsPerPage,
         sort_by: sortBy, // ソート順を追加
@@ -158,13 +154,7 @@ export default function SearchPocPage() {
     }
   };
 
-  // デバウンスされた検索キーワード、ページ、ソート順が変更されたら自動で検索
-  useEffect(() => {
-    performSearch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearchQuery, currentPage, sortBy]);
-
-  // 検索ボタンクリック時の処理
+  // 検索ボタンクリックまたはEnterキー押下時の処理
   const handleSearch = () => {
     setCurrentPage(1); // 検索時は1ページ目に戻る
     performSearch();
@@ -224,6 +214,8 @@ export default function SearchPocPage() {
   // ページ変更時の処理
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    // ページ変更時も検索を実行
+    performSearch();
     // ページトップにスムーススクロール
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -234,6 +226,8 @@ export default function SearchPocPage() {
   const handleSortChange = (newSortBy: string) => {
     setSortBy(newSortBy);
     setCurrentPage(1); // ページ番号を1にリセット
+    // ソート順変更時も検索を実行
+    performSearch();
   };
 
   // しくじり先生実行（失敗の原因を分析）
@@ -245,7 +239,7 @@ export default function SearchPocPage() {
       const result = await aiApi.analyze({
         question:
           "あなたは熟練の食品開発アドバイザーです。このファイルから失敗の原因について考察している内容をまとめて。",
-        q: debouncedSearchQuery || undefined, // 現在の検索キーワードを使用
+        q: searchQuery || undefined, // 現在の検索キーワードを使用
         sort_by: sortBy,
         top: 5, // 上位5件を分析
       });
@@ -268,8 +262,8 @@ export default function SearchPocPage() {
     try {
       const result = await aiApi.analyze({
         question:
-          "あなたは熟練の食品開発アドバイザーです。ファイル内の配合表の情報を整理した状態で提供してください。ファイルに配合情報がない場合は「情報なし」としてください",
-        q: debouncedSearchQuery || undefined, // 現在の検索キーワードを使用
+          "あなたは熟練の食品開発アドバイザーです。ファイル内の配合表の情報を基に、#実験No.もしくは実験日、#成分、#量、#結果　を整理した状態で提供してください。成分と量は、「成分A：〇g」のような書き方にして。ファイルに配合情報がない場合は「情報なし」としてください",
+        q: searchQuery || undefined, // 現在の検索キーワードを使用
         sort_by: sortBy,
         top: 5, // 上位5件を分析
       });
@@ -484,13 +478,7 @@ export default function SearchPocPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             {/* ヘッダー */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900">AI分析結果</h2>
-              </div>
+            <div className="flex items-center justify-end p-6 border-b border-gray-200">
               <button
                 onClick={() => setShowAiModal(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -504,9 +492,6 @@ export default function SearchPocPage() {
             <div className="flex-1 overflow-y-auto p-6">
               {/* 回答 */}
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  分析結果
-                </h3>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-none">
                   <div className="prose prose-blue max-w-none text-gray-800">
                     <ReactMarkdown
