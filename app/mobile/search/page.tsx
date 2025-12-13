@@ -289,7 +289,16 @@ export default function MobileSearchPage() {
               <div className="space-y-2">
                 {documents.length > 0 ? (
                   documents.map((doc) => (
-                    <MobileDocumentCard key={doc.id} document={doc} />
+                    <MobileDocumentCard
+                      key={doc.id}
+                      document={doc}
+                      tagLabels={{
+                        finalProduct: "用途",
+                        issue: "用途",
+                        ingredient: "原料",
+                        customer: "顧客",
+                      }}
+                    />
                   ))
                 ) : (
                   <div className="text-center py-8">

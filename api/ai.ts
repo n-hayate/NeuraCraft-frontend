@@ -7,7 +7,10 @@ export const aiApi = {
   analyze: async (request: AIAnalysisRequest) => {
     const response = await apiClient.post<AIAnalysisResponse>(
       "/ai/analyze",
-      request
+      request,
+      {
+        timeout: 150000, // AI分析APIは150秒のタイムアウトを設定（バックエンドのLLMタイムアウト120秒 + 余裕）
+      }
     );
     return response.data;
   },

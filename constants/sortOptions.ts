@@ -12,6 +12,10 @@ export interface SortOption {
  */
 export const SORT_OPTIONS: SortOption[] = [
   {
+    value: 'relevance',
+    label: '関連度順',
+  },
+  {
     value: 'updated_at_desc',
     label: '更新日が新しい順',
   },
