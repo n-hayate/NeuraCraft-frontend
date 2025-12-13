@@ -60,9 +60,8 @@ export default function SearchPocPage() {
   // 検索キーワードを管理
   const [searchQuery, setSearchQuery] = useState("");
 
-  // 検索結果のドキュメントリストを管理
-  const [documents, setDocuments] =
-    useState<KnowledgeDocument[]>(mockDocuments);
+  // 検索結果のドキュメントリストを管理（初期値は空配列）
+  const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
 
   // ローディング状態
   const [isLoading, setIsLoading] = useState(false);
@@ -145,9 +144,9 @@ export default function SearchPocPage() {
     } catch (err) {
       console.error("Search failed:", err);
       setError("検索に失敗しました");
-      // エラー時はモックデータを表示
-      setDocuments(mockDocuments);
-      setTotalCount(mockDocuments.length);
+      // エラー時は空配列を設定
+      setDocuments([]);
+      setTotalCount(0);
     } finally {
       setIsLoading(false);
       setHasSearched(true);
@@ -237,8 +236,33 @@ export default function SearchPocPage() {
 
     try {
       const result = await aiApi.analyze({
-        question:
-          "あなたは熟練の食品開発アドバイザーです。このファイルから失敗の原因について考察している内容をまとめて。",
+        question: `あなたは熟練の食品開発アドバイザーです。以下の検索上位の各レポートについて、本文に書かれている範囲で失敗内容を構造化してください。
+ルール：本文にない断定はしない。不明は「不明」と書く。各主張に「根拠（どのレポートのどの記述か）」を必ず付ける。
+出力：
+1)【レポート別】
+
+失敗症状
+
+発生工程/条件
+
+条件（配合/温度/時間/工程順/測定条件など分かる範囲）
+
+観察結果　
+　※数値があれば数値
+
+本文に書かれた原因仮説
+
+次アクション
+
+根拠
+2)【まとめ】
+
+共通点（条件/症状）
+
+差分
+　※効いた/効かなかった分岐点になりそうな条件
+
+次にやる検証`,
         q: searchQuery || undefined, // 現在の検索キーワードを使用
         sort_by: sortBy,
         top: 5, // 上位5件を分析
@@ -261,8 +285,19 @@ export default function SearchPocPage() {
 
     try {
       const result = await aiApi.analyze({
-        question:
-          "あなたは熟練の食品開発アドバイザーです。ファイル内の配合表の情報を基に、#実験No.もしくは実験日、#成分、#量、#結果　を整理した状態で提供してください。成分と量は、「成分A：〇g」のような書き方にして。ファイルに配合情報がない場合は「情報なし」としてください",
+        question: `あなたは熟練の食品開発アドバイザーです。各レポートから配合表・処方・工程条件を抽出し、レポート別に整理してください。
+出力（各レポートごと）：
+
+実験No または 実験日
+
+配合（「成分A：〇 g」「成分B：〇 %」のように 単位を必ず書く。単位が本文に無ければ「単位不明」と書く）
+
+工程条件（混合順、攪拌、温度、時間など分かる範囲）
+
+結果（良/不良と指標、測定条件があれば）
+
+根拠（引用）
+配合情報が見当たらないレポートは「情報なし」とする。`,
         q: searchQuery || undefined, // 現在の検索キーワードを使用
         sort_by: sortBy,
         top: 5, // 上位5件を分析
@@ -285,7 +320,7 @@ export default function SearchPocPage() {
     <div className="min-h-screen bg-gray-50">
       {/* ヘッダー */}
       <AppHeader
-        title="食品開発ナレッジ検索（POC）"
+        title="＜開発中＞ナレッジ検索 + 1"
         icon={
           <div className="w-10 h-10 bg-[#FFCB06] rounded-full flex items-center justify-center">
             <Search className="w-6 h-6 text-white" />
@@ -319,8 +354,8 @@ export default function SearchPocPage() {
           </div>
         )}
 
-        {/* 検索結果エリア */}
-        {!isLoading && !error && (
+        {/* 検索結果エリア（検索が実行された場合のみ表示） */}
+        {hasSearched && !isLoading && !error && (
           <>
             <div className="mb-6">
               {/* ヘッダー: 件数と並び替え、AI分析ボタン */}
