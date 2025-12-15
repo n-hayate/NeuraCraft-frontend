@@ -302,7 +302,7 @@ export default function FileRegisterPage() {
                       ファイル名: {formData.file.name}
                     </p>
                     <p className="text-[14px] text-[#0050B3] mt-1">
-                      メタ情報を入力して「登録する」ボタンを押してください。
+                      ファイル情報を入力して「登録する」ボタンを押してください。
                     </p>
                   </div>
                 </div>
@@ -312,7 +312,7 @@ export default function FileRegisterPage() {
             {/* メタ情報入力セクション */}
             <div className="bg-white border border-[#D9D9D9] rounded-[10px] p-[30px]">
               <h2 className="text-[20px] font-bold text-[#333333] mb-6">
-                メタ情報入力
+                ファイル情報入力
               </h2>
 
               {/* 2列グリッドレイアウト */}
