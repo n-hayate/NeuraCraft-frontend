@@ -1,29 +1,30 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Upload, CheckCircle } from 'lucide-react';
-import { SuccessModal } from '@/components/ui/SuccessModal';
+import { useState } from "react";
+import { Upload, CheckCircle } from "lucide-react";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { SuccessModal } from "@/components/ui/SuccessModal";
 
 // フォームデータの型定義
 interface FileUploadForm {
-  finalProduct: string;   // 最終製品
-  challenge: string;      // 課題感
-  ingredients: string;    // 使用原料
-  company: string;        // 提案企業（顧客）
-  trialId: string;        // 試作ID
-  assignee: string;       // 開発担当者
-  file: File | null;      // アップロードするファイル
+  finalProduct: string; // 最終製品
+  challenge: string; // 課題感
+  ingredients: string; // 使用原料
+  company: string; // 提案企業（顧客）
+  trialId: string; // 試作ID
+  assignee: string; // 開発担当者
+  file: File | null; // アップロードするファイル
 }
 
 export default function FileRegisterPage() {
   // フォームデータの状態管理
   const [formData, setFormData] = useState<FileUploadForm>({
-    finalProduct: '',
-    challenge: '',
-    ingredients: '',
-    company: '',
-    trialId: '',
-    assignee: '',
+    finalProduct: "",
+    challenge: "",
+    ingredients: "",
+    company: "",
+    trialId: "",
+    assignee: "",
     file: null,
   });
 
@@ -31,7 +32,7 @@ export default function FileRegisterPage() {
   const [uploadSuccess, setUploadSuccess] = useState(false);
 
   // アップロード後のファイル名
-  const [uploadedFileName, setUploadedFileName] = useState('');
+  const [uploadedFileName, setUploadedFileName] = useState("");
 
   // ローディング状態
   const [isLoading, setIsLoading] = useState(false);
@@ -57,19 +58,22 @@ export default function FileRegisterPage() {
    */
   const parseFileNameToMetadata = (fileName: string) => {
     // 拡張子を除去
-    const nameWithoutExtension = fileName.replace(/\.(pdf|xlsx?|xls|pptx?|ppt|docx?|doc)$/i, '');
+    const nameWithoutExtension = fileName.replace(
+      /\.(pdf|xlsx?|xls|pptx?|ppt|docx?|doc)$/i,
+      ""
+    );
 
     // アンダースコアで分割
-    const parts = nameWithoutExtension.split('_');
+    const parts = nameWithoutExtension.split("_");
 
     // 各パートを対応するフィールドにマッピング
     return {
-      finalProduct: parts[0]?.trim() || '',    // 最終製品
-      challenge: parts[1]?.trim() || '',       // 課題感
-      ingredients: parts[2]?.trim() || '',     // 使用原料
-      company: parts[3]?.trim() || '',         // 提案企業
-      trialId: parts[4]?.trim() || '',         // 試作ID
-      assignee: parts[5]?.trim() || '',        // 開発担当者
+      finalProduct: parts[0]?.trim() || "", // 最終製品
+      challenge: parts[1]?.trim() || "", // 課題感
+      ingredients: parts[2]?.trim() || "", // 使用原料
+      company: parts[3]?.trim() || "", // 提案企業
+      trialId: parts[4]?.trim() || "", // 試作ID
+      assignee: parts[5]?.trim() || "", // 開発担当者
     };
   };
 
@@ -77,18 +81,18 @@ export default function FileRegisterPage() {
   const handleFileSelect = (file: File) => {
     // 許可するファイル形式のリスト
     const allowedTypes = [
-      'application/pdf',                                                      // PDF
-      'application/vnd.ms-excel',                                            // Excel（古い形式）
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',  // Excel（新しい形式）
-      'application/vnd.ms-powerpoint',                                       // PowerPoint（旧形式）
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation', // PowerPoint（新形式）
-      'application/msword',                                                  // Word（旧形式）
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',   // Word（新形式）
+      "application/pdf", // PDF
+      "application/vnd.ms-excel", // Excel（古い形式）
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // Excel（新しい形式）
+      "application/vnd.ms-powerpoint", // PowerPoint（旧形式）
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation", // PowerPoint（新形式）
+      "application/msword", // Word（旧形式）
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // Word（新形式）
     ];
 
     // ファイル形式チェック
     if (!allowedTypes.includes(file.type)) {
-      alert('PDF、Excel、PowerPoint、Word ファイルを選択してください');
+      alert("PDF、Excel、PowerPoint、Word ファイルを選択してください");
       return;
     }
 
@@ -99,7 +103,7 @@ export default function FileRegisterPage() {
     setFormData({
       ...formData,
       file,
-      ...metadata,  // メタデータを自動入力
+      ...metadata, // メタデータを自動入力
     });
 
     // ファイル選択完了フラグを立てる
@@ -126,7 +130,7 @@ export default function FileRegisterPage() {
   const handleDragOver = (e: React.DragEvent) => {
     // ブラウザのデフォルト動作を防止
     e.preventDefault();
-    setIsDragging(true);  // ドラッグ中のスタイルを適用
+    setIsDragging(true); // ドラッグ中のスタイルを適用
   };
 
   // ドラッグが離れた時の処理
@@ -148,19 +152,19 @@ export default function FileRegisterPage() {
 
     // フォームリセット
     setFormData({
-      finalProduct: '',
-      challenge: '',
-      ingredients: '',
-      company: '',
-      trialId: '',
-      assignee: '',
+      finalProduct: "",
+      challenge: "",
+      ingredients: "",
+      company: "",
+      trialId: "",
+      assignee: "",
       file: null,
     });
     setFileSelected(false);
     setUploadSuccess(false);
 
     // ページトップにスクロール
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // フォーム送信時の処理
@@ -169,9 +173,15 @@ export default function FileRegisterPage() {
     e.preventDefault();
 
     // バリデーション: 必須項目のチェック
-    if (!formData.finalProduct || !formData.challenge || !formData.ingredients ||
-        !formData.company || !formData.trialId || !formData.file) {
-      alert('必須項目を全て入力してください');
+    if (
+      !formData.finalProduct ||
+      !formData.challenge ||
+      !formData.ingredients ||
+      !formData.company ||
+      !formData.trialId ||
+      !formData.file
+    ) {
+      alert("必須項目を全て入力してください");
       return;
     }
 
@@ -182,37 +192,39 @@ export default function FileRegisterPage() {
       const uploadData = new FormData();
 
       // ファイルは 'uploaded_file' という名前で送信（Swagger UIで確認した仕様に合わせる）
-      uploadData.append('uploaded_file', formData.file);
+      uploadData.append("uploaded_file", formData.file);
 
       // メタデータフィールドを追加
-      uploadData.append('application', formData.finalProduct);
-      uploadData.append('issue', formData.challenge);
-      uploadData.append('ingredient', formData.ingredients);
-      uploadData.append('customer', formData.company);
-      uploadData.append('trial_id', formData.trialId);
+      uploadData.append("application", formData.finalProduct);
+      uploadData.append("issue", formData.challenge);
+      uploadData.append("ingredient", formData.ingredients);
+      uploadData.append("customer", formData.company);
+      uploadData.append("trial_id", formData.trialId);
 
       // 開発担当者が入力されている場合のみ追加
       if (formData.assignee) {
-        uploadData.append('author', formData.assignee);
+        uploadData.append("author", formData.assignee);
       }
 
       // デバッグ: FormDataの内容を確認
-      console.log('FormData entries:');
+      console.log("FormData entries:");
       for (const [key, value] of uploadData.entries()) {
-        console.log(`- ${key}:`, value instanceof File ? `File(${value.name})` : value);
+        console.log(
+          `- ${key}:`,
+          value instanceof File ? `File(${value.name})` : value
+        );
       }
 
       // filesApi.create()を使ってアップロード
-      const { filesApi } = await import('@/api/files');
+      const { filesApi } = await import("@/api/files");
       const response = await filesApi.create(uploadData);
 
       // 成功時の処理: ポップアップ表示
       setUploadedFileName(formData.file.name);
       setShowSuccessModal(true);
-
     } catch (error) {
-      console.error('Upload error:', error);
-      alert('アップロードに失敗しました。もう一度お試しください。');
+      console.error("Upload error:", error);
+      alert("アップロードに失敗しました。もう一度お試しください。");
     } finally {
       setIsLoading(false);
     }
@@ -220,15 +232,19 @@ export default function FileRegisterPage() {
 
   return (
     <div className="min-h-screen bg-[#F7F7F7]">
-      {/* Headerは削除。Sidebarはlayoutで追加される */}
+      {/* ヘッダー */}
+      <AppHeader
+        title="新規ナレッジ登録"
+        icon={
+          <div className="w-10 h-10 bg-[#FFCB06] rounded-full flex items-center justify-center">
+            <Upload className="w-6 h-6 text-white" />
+          </div>
+        }
+        helpLink="/search-poc"
+      />
 
       <main className="p-10">
         <div className="max-w-[800px] mx-auto">
-          {/* ページタイトル */}
-          <h1 className="text-[32px] font-bold text-[#333333] mb-[30px]">
-            新規ナレッジ登録
-          </h1>
-
           <form onSubmit={handleSubmit} className="space-y-[30px]">
             {/* ファイルアップロードセクション */}
             <div>
@@ -240,7 +256,11 @@ export default function FileRegisterPage() {
                 className={`
                   bg-white border-[3px] border-dashed rounded-[10px] p-[60px_0] h-[224px]
                   flex flex-col items-center justify-center transition-all
-                  ${isDragging ? 'border-[#588DFF] bg-[#E6F0FF]' : 'border-[#A1A1A1]'}
+                  ${
+                    isDragging
+                      ? "border-[#588DFF] bg-[#E6F0FF]"
+                      : "border-[#A1A1A1]"
+                  }
                 `}
               >
                 {/* アップロードアイコン */}
@@ -265,7 +285,8 @@ export default function FileRegisterPage() {
                 </label>
 
                 <p className="text-[12px] text-[#A5A5A5] mt-4">
-                  PDF、Excel、PowerPoint、Word ファイルをアップロードしてください。
+                  PDF、Excel、PowerPoint、Word
+                  ファイルをアップロードしてください。
                 </p>
               </div>
 
@@ -281,7 +302,7 @@ export default function FileRegisterPage() {
                       ファイル名: {formData.file.name}
                     </p>
                     <p className="text-[14px] text-[#0050B3] mt-1">
-                      メタ情報を入力して「登録する」ボタンを押してください。
+                      ファイル情報を入力して「登録する」ボタンを押してください。
                     </p>
                   </div>
                 </div>
@@ -290,7 +311,9 @@ export default function FileRegisterPage() {
 
             {/* メタ情報入力セクション */}
             <div className="bg-white border border-[#D9D9D9] rounded-[10px] p-[30px]">
-              <h2 className="text-[20px] font-bold text-[#333333] mb-6">メタ情報入力</h2>
+              <h2 className="text-[20px] font-bold text-[#333333] mb-6">
+                ファイル情報入力
+              </h2>
 
               {/* 2列グリッドレイアウト */}
               <div className="grid grid-cols-2 gap-x-[40px] gap-y-6">
@@ -303,7 +326,9 @@ export default function FileRegisterPage() {
                     type="text"
                     placeholder="最終製品名を入力"
                     value={formData.finalProduct}
-                    onChange={(e) => handleInputChange('finalProduct', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("finalProduct", e.target.value)
+                    }
                     className="w-full h-[40px] border border-[#A1A1A1] rounded-[10px] px-4 text-[14px] text-[#333333] placeholder:text-[#A5A5A5]"
                     required
                   />
@@ -318,7 +343,9 @@ export default function FileRegisterPage() {
                     type="text"
                     placeholder="課題を入力"
                     value={formData.challenge}
-                    onChange={(e) => handleInputChange('challenge', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("challenge", e.target.value)
+                    }
                     className="w-full h-[40px] border border-[#A1A1A1] rounded-[10px] px-4 text-[14px] text-[#333333] placeholder:text-[#A5A5A5]"
                     required
                   />
@@ -333,7 +360,9 @@ export default function FileRegisterPage() {
                     type="text"
                     placeholder="使用した原料を入力"
                     value={formData.ingredients}
-                    onChange={(e) => handleInputChange('ingredients', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("ingredients", e.target.value)
+                    }
                     className="w-full h-[40px] border border-[#A1A1A1] rounded-[10px] px-4 text-[14px] text-[#333333] placeholder:text-[#A5A5A5]"
                     required
                   />
@@ -348,7 +377,9 @@ export default function FileRegisterPage() {
                     type="text"
                     placeholder="顧客名を入力"
                     value={formData.company}
-                    onChange={(e) => handleInputChange('company', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("company", e.target.value)
+                    }
                     className="w-full h-[40px] border border-[#A1A1A1] rounded-[10px] px-4 text-[14px] text-[#333333] placeholder:text-[#A5A5A5]"
                     required
                   />
@@ -363,7 +394,9 @@ export default function FileRegisterPage() {
                     type="text"
                     placeholder="IDを入力"
                     value={formData.trialId}
-                    onChange={(e) => handleInputChange('trialId', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("trialId", e.target.value)
+                    }
                     className="w-full h-[40px] border border-[#A1A1A1] rounded-[10px] px-4 text-[14px] text-[#333333] placeholder:text-[#A5A5A5]"
                     required
                   />
@@ -378,7 +411,9 @@ export default function FileRegisterPage() {
                     type="text"
                     placeholder="担当者名を入力"
                     value={formData.assignee}
-                    onChange={(e) => handleInputChange('assignee', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("assignee", e.target.value)
+                    }
                     className="w-full h-[40px] border border-[#A1A1A1] rounded-[10px] px-4 text-[14px] text-[#333333] placeholder:text-[#A5A5A5]"
                   />
                 </div>
@@ -393,13 +428,14 @@ export default function FileRegisterPage() {
                 className={`
                   w-[267px] h-[56px] text-[20px] font-bold rounded-[10px]
                   transition-colors
-                  ${isLoading || !formData.file
-                    ? 'bg-[#EFEFEF] text-[#A5A5A5] cursor-not-allowed'
-                    : 'bg-[#FFCB06] text-white hover:bg-[#E6B800]'
+                  ${
+                    isLoading || !formData.file
+                      ? "bg-[#EFEFEF] text-[#A5A5A5] cursor-not-allowed"
+                      : "bg-[#FFCB06] text-white hover:bg-[#E6B800]"
                   }
                 `}
               >
-                {isLoading ? '登録中...' : '登録する'}
+                {isLoading ? "登録中..." : "登録する"}
               </button>
             </div>
           </form>

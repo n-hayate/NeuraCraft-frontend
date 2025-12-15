@@ -73,6 +73,7 @@ export default function DashboardPlaygroundPage() {
             <BarChart3 className="w-6 h-6 text-white" />
           </div>
         }
+        helpLink="/search-poc"
       />
 
       <div className="p-8 text-gray-900 font-sans">
@@ -85,34 +86,34 @@ export default function DashboardPlaygroundPage() {
             </div>
           </div>
 
-        {/* 統計カードセクション */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatCard
-            title="今月の新規登録数"
-            value={data.new_files_last_month.toLocaleString()}
-            icon={<Plus />}
-          />
-          <StatCard
-            title="今月のダウンロード数"
-            value={data.downloads_this_month.toLocaleString()}
-            icon={<Download />}
-          />
-          <StatCard
-            title="総登録件数"
-            value={data.total_files.toLocaleString()}
-            icon={<FileText />}
-          />
-        </div>
+          {/* 統計カードセクション */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <StatCard
+              title="今月の新規登録数"
+              value={data.new_files_last_month.toLocaleString()}
+              icon={<Plus />}
+            />
+            <StatCard
+              title="今月のダウンロード数"
+              value={data.downloads_this_month.toLocaleString()}
+              icon={<Download />}
+            />
+            <StatCard
+              title="総登録件数"
+              value={data.total_files.toLocaleString()}
+              icon={<FileText />}
+            />
+          </div>
 
-        {/* リストとグラフセクション */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div>
-            <DownloadRankingList data={data.top_downloads_last_week} />
+          {/* リストとグラフセクション */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <DownloadRankingList data={data.top_downloads_last_week} />
+            </div>
+            <div>
+              <RegistrationTrendChart data={data.registration_trend} />
+            </div>
           </div>
-          <div>
-            <RegistrationTrendChart data={data.registration_trend} />
-          </div>
-        </div>
 
           {/* ワードインプレッション */}
           <div className="h-[300px]">
