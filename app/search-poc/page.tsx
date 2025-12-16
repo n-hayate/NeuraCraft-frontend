@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Sparkles, X, Loader2 } from "lucide-react";
+import { Search, X, Loader2, Download } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { SearchBar } from "@/components/SearchBar";
@@ -9,9 +9,10 @@ import { DocumentCard } from "@/components/DocumentCard";
 import { KnowledgeDocument } from "@/types/knowledge";
 import { filesApi } from "@/api/files";
 import { FileRead } from "@/types/files";
-import { SORT_OPTIONS, DEFAULT_SORT_BY } from "@/constants/sortOptions";
+import { SORT_OPTIONS } from "@/constants/sortOptions";
 import { aiApi } from "@/api/ai";
 import { AIAnalysisResponse } from "@/types/ai";
+import { useFileDownload } from "@/hooks/useFileDownload";
 
 // モックデータ（開発用のダミーデータ）
 const mockDocuments: KnowledgeDocument[] = [
@@ -86,6 +87,11 @@ export default function SearchPocPage() {
   const [aiAnalysisResult, setAiAnalysisResult] =
     useState<AIAnalysisResponse | null>(null);
   const [showAiModal, setShowAiModal] = useState(false);
+  const {
+    downloadFile,
+    isDownloading,
+    error: downloadError,
+  } = useFileDownload();
 
   // バックエンドのFileReadをKnowledgeDocumentに変換
   const convertFileToDocument = (file: FileRead): KnowledgeDocument => {
@@ -599,15 +605,50 @@ export default function SearchPocPage() {
                       参照したファイル ({aiAnalysisResult.sources.length}件)
                     </h3>
                     <ul className="space-y-2">
-                      {aiAnalysisResult.sources.map((source, index) => (
+                      {(aiAnalysisResult.source_files &&
+                      aiAnalysisResult.source_files.length > 0
+                        ? aiAnalysisResult.source_files.map((s) => ({
+                            file_id: s.file_id,
+                            original_name: s.original_name,
+                          }))
+                        : aiAnalysisResult.sources.map((name) => ({
+                            file_id: "",
+                            original_name: name,
+                          }))
+                      ).map((source, index) => (
                         <li
-                          key={index}
-                          className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-700"
+                          key={`${
+                            source.file_id || source.original_name
+                          }-${index}`}
+                          className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-700 flex items-center justify-between gap-3"
                         >
-                          {source}
+                          <span className="break-all">
+                            {source.original_name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              downloadFile(source.file_id, source.original_name)
+                            }
+                            disabled={!source.file_id || isDownloading}
+                            className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white p-2 text-gray-700 hover:bg-gray-100 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            aria-label={`${source.original_name} をダウンロード`}
+                            title={
+                              source.file_id
+                                ? "ダウンロード"
+                                : "ダウンロード情報が取得できませんでした"
+                            }
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
                         </li>
                       ))}
                     </ul>
+                    {downloadError && (
+                      <div className="mt-3 bg-red-50 border border-red-200 rounded-lg p-3">
+                        <p className="text-red-800 text-sm">{downloadError}</p>
+                      </div>
+                    )}
                   </div>
                 )}
 
